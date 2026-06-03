@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Měřenka SSI – míry postavy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container my-4">
+
+    <header class="d-flex align-items-center mb-4">
+        <img src="img/logo.svg" alt="VAVI" height="40">
+        <h1 class="h4 mb-0 ms-3">Míry postavy</h1>
+    </header>
+
+    <form id="miry" method="post" novalidate>
+
+        <div class="row g-4">
+
+            <!-- ===================== TABULKA MUŽ ===================== -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header tbl-head-muz fw-semibold">Muž</div>
+                    <div class="card-body">
+                        <table class="table table-sm table-bordered align-middle mb-2 mira-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:3rem">#</th>
+                                    <th>Název rozměru</th>
+                                    <th style="width:8rem">Míra v cm</th>
+                                </tr>
+                            </thead>
+                            <tbody><!-- řádky generuje app.js --></tbody>
+                        </table>
+                        <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== TABULKA ŽENA ===================== -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header tbl-head-zena fw-semibold">Žena</div>
+                    <div class="card-body">
+                        <table class="table table-sm table-bordered align-middle mb-2 mira-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:3rem">#</th>
+                                    <th>Název rozměru</th>
+                                    <th style="width:8rem">Míra v cm</th>
+                                </tr>
+                            </thead>
+                            <tbody><!-- řádky generuje app.js --></tbody>
+                        </table>
+                        <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== ODESLÁNÍ ===================== -->
+        <div class="mt-4 no-print">
+            <button type="submit" class="btn btn-outline-secondary btn-lg w-100">
+                <i class="bi bi-save"></i> Uložit míry (zatím jen ukázka)
+            </button>
+        </div>
+
+        <!-- ===================== ILUSTRACE ===================== -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header fw-semibold">Vyobrazení měřených rozměrů</div>
+            <div class="card-body">
+                <p class="small text-secondary">
+                    Tip: klikněte na číslo v obrázku nebo na pole v tabulce – příslušná míra se zvýrazní.
+                </p>
+                <div class="row text-center g-3 figures">
+
+                    <!-- ================================================= -->
+                    <!-- ===============  MUŽ – ZEPŘEDU  ================== -->
+                    <!-- ================================================= -->
+                    <div class="col-md-4">
+                        <h2 class="h6 text-secondary">Muž – zepředu</h2>
+                        <svg viewBox="0 0 220 470" class="figure-svg" data-fig="muz" aria-label="Muž zepředu">
+
+                            <!-- ŠIPKY: ah = černá hrotová šipka, ld = šedá odkazová šipka -->
+                            <defs>
+                                <marker id="ah-mf" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 z" fill="#1a1a1a"/>
+                                </marker>
+                                <marker id="ld-mf" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                    <path d="M0,0 L6,3 L0,6 z" fill="#9a9a9a"/>
+                                </marker>
+                            </defs>
+
+                            <!-- ============ TĚLO (obrys postavy) ============ -->
+                            <g class="body">
+                                <ellipse class="hlava"    cx="105" cy="36" rx="16" ry="20"/>            <!-- hlava -->
+                                <path    class="krk"      d="M98,55 L98,64 M112,55 L112,64"/>            <!-- krk -->
+                                <path    class="trup"     d="M98,63 Q84,65 74,75 Q67,87 71,102 L77,152 Q73,180 78,208 L132,208 Q137,180 133,152 L139,102 Q143,87 136,75 Q126,65 112,63 Z"/> <!-- trup: ramena → hrudník → pas → boky -->
+                                <path    class="noha-l"   d="M82,208 Q75,270 80,330 L83,410 L96,410 Q98,350 99,290 L100,212"/>  <!-- levá noha -->
+                                <path    class="noha-p"   d="M128,208 Q135,270 130,330 L127,410 L114,410 Q112,350 111,290 L110,212"/> <!-- pravá noha -->
+                                <path    class="chodidla" d="M83,410 L74,418 M96,410 L96,418 M127,410 L136,418 M114,410 L114,418"/> <!-- chodidla -->
+                                <path    class="paze-l"   d="M74,76 Q60,92 57,122 L56,168 Q56,180 61,181 L67,181 Q71,150 73,122 Q75,100 79,90"/>     <!-- levá paže -->
+                                <path    class="paze-p"   d="M136,76 Q150,92 153,122 L154,168 Q154,180 149,181 L143,181 Q139,150 137,122 Q135,100 131,90"/> <!-- pravá paže -->
+                                <path    class="ground"   d="M45,418 L205,418"/>                          <!-- podlaha -->
+                            </g>
+
+                            <!-- ============ MĚŘICÍ ZNAČKY ============ -->
+                            <g class="dims">
+                                <!-- 1 · výška postavy -->
+                                <g class="mira-marker" data-mira="muz-1">
+                                    <path class="thin" d="M105,16 L190,16"/>
+                                    <line x1="190" y1="16" x2="190" y2="418" marker-start="url(#ah-mf)" marker-end="url(#ah-mf)"/>
+                                    <text class="num" x="200" y="232">1</text>
+                                </g>
+                                <!-- 2 · obvod krku -->
+                                <g class="mira-marker" data-mira="muz-2">
+                                    <ellipse class="dash" cx="105" cy="62" rx="13" ry="4"/>
+                                    <line class="lead" x1="135" y1="46" x2="118" y2="60" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="140" y="43">2</text>
+                                </g>
+                                <!-- 3 · obvod hrudníku -->
+                                <g class="mira-marker" data-mira="muz-3">
+                                    <ellipse class="dash" cx="105" cy="115" rx="35" ry="6"/>
+                                    <line class="lead" x1="38" y1="113" x2="68" y2="115" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="31" y="112">3</text>
+                                </g>
+                                <!-- 4 · obvod pasu -->
+                                <g class="mira-marker" data-mira="muz-4">
+                                    <ellipse class="dash" cx="105" cy="152" rx="31" ry="6"/>
+                                    <line class="lead" x1="38" y1="152" x2="72" y2="152" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="31" y="152">4</text>
+                                </g>
+                                <!-- 5 · obvod sedu -->
+                                <g class="mira-marker" data-mira="muz-5">
+                                    <ellipse class="dash" cx="105" cy="200" rx="33" ry="6"/>
+                                    <line class="lead" x1="38" y1="200" x2="70" y2="200" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="31" y="200">5</text>
+                                </g>
+                                <!-- 6 · délka ramene a ruky -->
+                                <g class="mira-marker" data-mira="muz-6">
+                                    <path d="M76,74 Q60,90 57,122 L56,166" marker-end="url(#ah-mf)"/>
+                                    <path d="M78,73 L93,67" marker-end="url(#ah-mf)"/>
+                                    <line class="lead" x1="22" y1="131" x2="54" y2="150" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="16" y="129">6</text>
+                                </g>
+                                <!-- 7 · obvod paže * -->
+                                <g class="mira-marker" data-mira="muz-7">
+                                    <ellipse class="dash" cx="64" cy="118" rx="12" ry="4"/>
+                                    <line class="lead" x1="21" y1="100" x2="52" y2="116" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="16" y="97">7</text>
+                                </g>
+                                <!-- 8 · obvod stehna * -->
+                                <g class="mira-marker" data-mira="muz-8">
+                                    <ellipse class="dash" cx="90" cy="252" rx="15" ry="5"/>
+                                    <line class="lead" x1="38" y1="252" x2="74" y2="252" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="31" y="252">8</text>
+                                </g>
+                                <!-- 10 · kroková délka -->
+                                <g class="mira-marker" data-mira="muz-10">
+                                    <line x1="105" y1="212" x2="105" y2="404" marker-end="url(#ah-mf)"/>
+                                    <path d="M96,407 L114,407"/>
+                                    <line class="lead" x1="126" y1="316" x2="108" y2="300" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="132" y="318">10</text>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- ===============  MUŽ – ZEZADU  =================== -->
+                    <!-- ================================================= -->
+                    <div class="col-md-4">
+                        <h2 class="h6 text-secondary">Muž – zezadu</h2>
+                        <svg viewBox="0 0 220 470" class="figure-svg" data-fig="muz-zad" aria-label="Muž zezadu">
+                            <defs>
+                                <marker id="ah-mb" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 z" fill="#1a1a1a"/>
+                                </marker>
+                                <marker id="ld-mb" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                    <path d="M0,0 L6,3 L0,6 z" fill="#9a9a9a"/>
+                                </marker>
+                            </defs>
+
+                            <!-- ============ TĚLO (obrys postavy) ============ -->
+                            <g class="body">
+                                <ellipse class="hlava"    cx="105" cy="36" rx="16" ry="20"/>            <!-- hlava -->
+                                <path    class="vlasy"    d="M91,30 Q105,18 119,30"/>                    <!-- vlasy (pohled zezadu) -->
+                                <path    class="krk"      d="M98,55 L98,64 M112,55 L112,64"/>            <!-- krk -->
+                                <path    class="trup"     d="M98,63 Q84,65 74,75 Q67,87 71,102 L77,152 Q73,180 78,208 L132,208 Q137,180 133,152 L139,102 Q143,87 136,75 Q126,65 112,63 Z"/> <!-- trup -->
+                                <path    class="noha-l"   d="M82,208 Q75,270 80,330 L83,410 L96,410 Q98,350 99,290 L100,212"/>  <!-- levá noha -->
+                                <path    class="noha-p"   d="M128,208 Q135,270 130,330 L127,410 L114,410 Q112,350 111,290 L110,212"/> <!-- pravá noha -->
+                                <path    class="chodidla" d="M83,410 L74,418 M96,410 L96,418 M127,410 L136,418 M114,410 L114,418"/> <!-- chodidla -->
+                                <path    class="paze-l"   d="M74,76 Q60,92 57,122 L56,168 Q56,180 61,181 L67,181 Q71,150 73,122 Q75,100 79,90"/>     <!-- levá paže -->
+                                <path    class="paze-p"   d="M136,76 Q150,92 153,122 L154,168 Q154,180 149,181 L143,181 Q139,150 137,122 Q135,100 131,90"/> <!-- pravá paže -->
+                                <path    class="ground"   d="M45,418 L205,418"/>                          <!-- podlaha -->
+                            </g>
+
+                            <!-- ============ MĚŘICÍ ZNAČKY ============ -->
+                            <g class="dims">
+                                <!-- 1 · výška postavy -->
+                                <g class="mira-marker" data-mira="muz-1">
+                                    <path class="thin" d="M105,16 L190,16"/>
+                                    <line x1="190" y1="16" x2="190" y2="418" marker-start="url(#ah-mb)" marker-end="url(#ah-mb)"/>
+                                    <text class="num" x="200" y="232">1</text>
+                                </g>
+                                <!-- 9 · šíře zad -->
+                                <g class="mira-marker" data-mira="muz-9">
+                                    <line x1="75" y1="108" x2="135" y2="108" marker-start="url(#ah-mb)" marker-end="url(#ah-mb)"/>
+                                    <line class="lead" x1="105" y1="90" x2="105" y2="104" marker-end="url(#ld-mb)"/>
+                                    <text class="num" x="105" y="84">9</text>
+                                </g>
+                                <!-- 5 · obvod sedu -->
+                                <g class="mira-marker" data-mira="muz-5">
+                                    <ellipse class="dash" cx="105" cy="200" rx="33" ry="6"/>
+                                    <line class="lead" x1="38" y1="200" x2="70" y2="200" marker-end="url(#ld-mb)"/>
+                                    <text class="num" x="31" y="200">5</text>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- ===============  ŽENA – ZEPŘEDU  ================= -->
+                    <!-- ================================================= -->
+                    <div class="col-md-4">
+                        <h2 class="h6 text-secondary">Žena – zepředu</h2>
+                        <svg viewBox="0 0 220 470" class="figure-svg" data-fig="zena" aria-label="Žena zepředu">
+                            <defs>
+                                <marker id="ah-zf" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 z" fill="#1a1a1a"/>
+                                </marker>
+                                <marker id="ld-zf" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                    <path d="M0,0 L6,3 L0,6 z" fill="#9a9a9a"/>
+                                </marker>
+                            </defs>
+
+                            <!-- ============ TĚLO (obrys postavy) ============ -->
+                            <g class="body">
+                                <ellipse class="hlava"    cx="105" cy="34" rx="15" ry="19"/>            <!-- hlava -->
+                                <path    class="vlasy"    d="M90,30 Q88,52 96,58 M120,30 Q122,52 114,58"/> <!-- vlasy -->
+                                <path    class="krk"      d="M99,52 L99,62 M111,52 L111,62"/>            <!-- krk -->
+                                <path    class="trup"     d="M98,60 Q85,62 76,73 Q70,85 75,101 Q78,116 87,126 Q74,138 80,158 Q71,180 78,206 L132,206 Q139,180 130,158 Q136,138 123,126 Q132,116 135,101 Q140,85 134,73 Q125,62 112,60 Z"/> <!-- trup: hrudník → úzký pas → boky -->
+                                <path    class="noha-l"   d="M84,206 Q78,270 83,330 L86,408 L97,408 Q99,350 100,290 L101,210"/>  <!-- levá noha -->
+                                <path    class="noha-p"   d="M126,206 Q132,270 127,330 L124,408 L113,408 Q111,350 110,290 L109,210"/> <!-- pravá noha -->
+                                <path    class="chodidla" d="M86,408 L78,416 M97,408 L97,416 M124,408 L132,416 M113,408 L113,416"/> <!-- chodidla -->
+                                <path    class="paze-l"   d="M76,74 Q63,90 60,120 L59,165 Q59,177 64,178 L69,178 Q72,148 74,120 Q76,100 80,90"/>     <!-- levá paže -->
+                                <path    class="paze-p"   d="M134,74 Q147,90 150,120 L151,165 Q151,177 146,178 L141,178 Q138,148 136,120 Q134,100 130,90"/> <!-- pravá paže -->
+                                <path    class="ground"   d="M45,416 L205,416"/>                          <!-- podlaha -->
+                            </g>
+
+                            <!-- ============ MĚŘICÍ ZNAČKY ============ -->
+                            <g class="dims">
+                                <!-- 1 · výška postavy -->
+                                <g class="mira-marker" data-mira="zena-1">
+                                    <path class="thin" d="M105,14 L190,14"/>
+                                    <line x1="190" y1="14" x2="190" y2="416" marker-start="url(#ah-zf)" marker-end="url(#ah-zf)"/>
+                                    <text class="num" x="200" y="232">1</text>
+                                </g>
+                                <!-- 2 · obvod hrudníku -->
+                                <g class="mira-marker" data-mira="zena-2">
+                                    <ellipse class="dash" cx="105" cy="112" rx="30" ry="6"/>
+                                    <line class="lead" x1="38" y1="112" x2="73" y2="112" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="31" y="112">2</text>
+                                </g>
+                                <!-- 3 · obvod pasu -->
+                                <g class="mira-marker" data-mira="zena-3">
+                                    <ellipse class="dash" cx="105" cy="150" rx="20" ry="5"/>
+                                    <line class="lead" x1="38" y1="150" x2="83" y2="150" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="31" y="150">3</text>
+                                </g>
+                                <!-- 4 · obvod sedu -->
+                                <g class="mira-marker" data-mira="zena-4">
+                                    <ellipse class="dash" cx="105" cy="198" rx="30" ry="6"/>
+                                    <line class="lead" x1="38" y1="198" x2="73" y2="198" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="31" y="198">4</text>
+                                </g>
+                                <!-- 5 · délka ramene a ruky -->
+                                <g class="mira-marker" data-mira="zena-5">
+                                    <path d="M76,74 Q63,90 60,120 L59,164" marker-end="url(#ah-zf)"/>
+                                    <line class="lead" x1="22" y1="137" x2="58" y2="150" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="16" y="135">5</text>
+                                </g>
+                                <!-- 6 · obvod paže * -->
+                                <g class="mira-marker" data-mira="zena-6">
+                                    <ellipse class="dash" cx="63" cy="112" rx="11" ry="4"/>
+                                    <line class="lead" x1="21" y1="97" x2="52" y2="110" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="16" y="94">6</text>
+                                </g>
+                                <!-- 7 · obvod stehna * -->
+                                <g class="mira-marker" data-mira="zena-7">
+                                    <ellipse class="dash" cx="90" cy="248" rx="14" ry="5"/>
+                                    <line class="lead" x1="38" y1="248" x2="76" y2="248" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="31" y="248">7</text>
+                                </g>
+                                <!-- 8 · kroková délka -->
+                                <g class="mira-marker" data-mira="zena-8">
+                                    <line x1="105" y1="210" x2="105" y2="402" marker-end="url(#ah-zf)"/>
+                                    <path d="M97,405 L113,405"/>
+                                    <line class="lead" x1="126" y1="316" x2="108" y2="300" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="132" y="318">8</text>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== JAK SPRÁVNĚ MĚŘIT ===================== -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-info-circle"></i> Jak správně měřit postavu
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    Základem přesného měření je stát <strong>rovně a uvolněně</strong> a krejčovský metr držet
+                    vždy <strong>vodorovně se zemí</strong>. Pro kontrolu roviny si můžete do pasu uvázat tenkou
+                    stuhu. Měřte se ideálně jen <strong>ve spodním prádle</strong>, aby výsledek nezkreslilo oblečení.
+                </p>
+                <p class="fw-semibold mb-2">Klíčové tělesné rozměry a postup:</p>
+                <dl class="row mb-2 small">
+                    <dt class="col-sm-4 col-lg-3">Výška postavy</dt>
+                    <dd class="col-sm-8 col-lg-9">Bez bot, zády ke zdi. Změřte vzdálenost od pat až po temeno hlavy.</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Obvod hrudníku</dt>
+                    <dd class="col-sm-8 col-lg-9">Metr veďte vodorovně přes nejširší místo prsou, přes lopatky a podpaží.</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Obvod pasu</dt>
+                    <dd class="col-sm-8 col-lg-9">V nejužším místě trupu (zhruba nad pupkem a pod žebry). Při měření nezatahujte břicho.</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Obvod boků (sedu)</dt>
+                    <dd class="col-sm-8 col-lg-9">Vodorovně přes nejširší část hýždí a stehen.</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Délka rukávu</dt>
+                    <dd class="col-sm-8 col-lg-9">Ruku mírně pokrčte v lokti. Měřte od ramenního kloubu přes loket až k zápěstí.</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Vnitřní délka nohou</dt>
+                    <dd class="col-sm-8 col-lg-9">Vnitřní šev – od rozkroku po vnitřní straně nohy až k podlaze (či k dolnímu okraji kalhot).</dd>
+
+                    <dt class="col-sm-4 col-lg-3">Obvod krku</dt>
+                    <dd class="col-sm-8 col-lg-9">Metr přiložte kolem krku těsně nad rameny a pod ohryzkem.</dd>
+                </dl>
+                <p class="small text-muted mb-3">
+                    Další užitečné tipy a vizuální návody najdete např. na portálu Modio nebo u prodejců střihů (Sijeme Hravě).
+                </p>
+                <hr>
+                <p class="small text-muted mb-0">
+                    <strong>*</strong> Velikost vyplňujte pouze u sortimentu, který si přejete objednat.
+                    Pokud si nejste jisti svou velikostí, přeměřte se dle vyobrazené ilustrace.
+                    Naměřené míry <strong>neupravujte</strong> ani jedním směrem – výrobce oblečení
+                    s rezervou pro volný pohyb již počítá.
+                </p>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- Okno s přehledem zadaných měr (zatím místo odeslání do DB) -->
+<div class="modal fade" id="dataModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Zadané míry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+            </div>
+            <div class="modal-body" id="dataModalBody"></div>
+            <div class="modal-footer">
+                <small class="text-muted me-auto">Toto je jen náhled – odeslání do databáze přidáme v dalším kroku.</small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
