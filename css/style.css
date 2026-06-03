@@ -53,6 +53,20 @@
     stroke-width: 0.9;
 }
 
+/* šedé kolečko pod číslem */
+.figure-svg .num-bg {
+    fill: #e0e0e0;
+    stroke: none;
+    transition: fill .15s ease;
+}
+
+/* průhledná větší oblast pro klik */
+.figure-svg .hit-area {
+    fill: transparent;
+    stroke: none;
+    cursor: pointer;
+}
+
 /* čísla – černě, bokem od postavy */
 .figure-svg .num {
     fill: #1a1a1a;
@@ -67,16 +81,19 @@
 /* celá značka je klikatelná */
 .figure-svg .mira-marker { cursor: pointer; }
 
-/* Aktivní značka (focus na poli míry / klik) – modře (odliší se od hnědé postavy) */
+/* Aktivní značka (focus na poli míry / klik) – modře */
 .figure-svg .mira-marker.mira-active line,
 .figure-svg .mira-marker.mira-active path,
 .figure-svg .mira-marker.mira-active ellipse {
     stroke: var(--mira-active);
     stroke-width: 2.8;
 }
+.figure-svg .mira-marker.mira-active .num-bg {
+    fill: var(--mira-active) !important;
+}
 .figure-svg .mira-marker.mira-active .num {
-    fill: var(--mira-active);
-    font-size: 15px;
+    fill: #fff;
+    font-size: 13px;
     font-weight: 800;
 }
 

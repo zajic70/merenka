@@ -60,15 +60,47 @@
     if (muzBody) renderRows('muz', muzBody);
     if (zenaBody) renderRows('zena', zenaBody);
 
+    // ---- Šedé kolečko + velká oblast pro klik pod každým číslem ----
+    const NS = 'http://www.w3.org/2000/svg';
+    document.querySelectorAll('.mira-marker').forEach(function (marker) {
+        var num = marker.querySelector('.num');
+        if (!num) return;
+        var cx = +num.getAttribute('x');
+        var cy = +num.getAttribute('y');
+
+        // šedé kolečko (pozadí čísla)
+        var bg = document.createElementNS(NS, 'circle');
+        bg.setAttribute('cx', cx);
+        bg.setAttribute('cy', cy);
+        bg.setAttribute('r', '11');
+        bg.setAttribute('class', 'num-bg');
+        marker.insertBefore(bg, num);
+
+        // průhledný větší kruh pro pohodlnější klik
+        var hit = document.createElementNS(NS, 'circle');
+        hit.setAttribute('cx', cx);
+        hit.setAttribute('cy', cy);
+        hit.setAttribute('r', '18');
+        hit.setAttribute('class', 'hit-area');
+        marker.appendChild(hit);
+    });
+
     // ---- Propojení pole <-> SVG značka ----
     function markers(key) {
         // může být ve více SVG (např. muz-1 zepředu i zboku)
         return document.querySelectorAll('.mira-marker[data-mira="' + key + '"]');
     }
 
+    var COLOR_ACTIVE = '#0d6efd';
+    var COLOR_DEFAULT = '#e0e0e0';
+
     function setActive(key, on) {
-        markers(key).forEach(function (g) { g.classList.toggle('mira-active', on); });
-        const row = document.querySelector('tr[data-row="' + key + '"]');
+        markers(key).forEach(function (g) {
+            g.classList.toggle('mira-active', on);
+            var bg = g.querySelector('.num-bg');
+            if (bg) bg.setAttribute('fill', on ? COLOR_ACTIVE : COLOR_DEFAULT);
+        });
+        var row = document.querySelector('tr[data-row="' + key + '"]');
         if (row) row.classList.toggle('row-active', on);
     }
 
