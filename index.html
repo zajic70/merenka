@@ -98,12 +98,12 @@
                             <g class="body">
                                 <ellipse class="hlava"    cx="105" cy="36" rx="16" ry="20"/>            <!-- hlava -->
                                 <path    class="krk"      d="M98,55 L98,64 M112,55 L112,64"/>            <!-- krk -->
-                                <path    class="trup"     d="M98,63 Q84,65 74,75 Q67,87 71,102 L77,152 Q73,180 78,208 L132,208 Q137,180 133,152 L139,102 Q143,87 136,75 Q126,65 112,63 Z"/> <!-- trup: ramena → hrudník → pas → boky -->
+                                <path    class="trup"     d="M98,62 Q80,64 69,75 Q60,88 65,104 L75,152 Q71,180 76,208 L134,208 Q139,180 135,152 L145,104 Q150,88 141,75 Q130,64 112,62 Z"/> <!-- trup: ramena → hrudník → pas → boky (robustnější) -->
                                 <path    class="noha-l"   d="M82,208 Q75,270 80,330 L83,410 L96,410 Q98,350 99,290 L100,212"/>  <!-- levá noha -->
                                 <path    class="noha-p"   d="M128,208 Q135,270 130,330 L127,410 L114,410 Q112,350 111,290 L110,212"/> <!-- pravá noha -->
                                 <path    class="chodidla" d="M83,410 L74,418 M96,410 L96,418 M127,410 L136,418 M114,410 L114,418"/> <!-- chodidla -->
-                                <path    class="paze-l"   d="M74,76 Q60,92 57,122 L56,168 Q56,180 61,181 L67,181 Q71,150 73,122 Q75,100 79,90"/>     <!-- levá paže -->
-                                <path    class="paze-p"   d="M136,76 Q150,92 153,122 L154,168 Q154,180 149,181 L143,181 Q139,150 137,122 Q135,100 131,90"/> <!-- pravá paže -->
+                                <path    class="paze-l"   d="M70,76 Q57,92 55,124 L54,196 Q53,228 58,252 L64,254 Q69,228 70,194 Q70,146 72,122 Q74,100 79,90"/>     <!-- levá paže – ~60 % výšky -->
+                                <path    class="paze-p"   d="M140,76 Q153,92 155,124 L156,196 Q157,228 152,252 L146,254 Q141,228 140,194 Q140,146 138,122 Q136,100 131,90"/> <!-- pravá paže – ~60 % výšky -->
                                 <path    class="ground"   d="M45,418 L205,418"/>                          <!-- podlaha -->
                             </g>
 
@@ -123,9 +123,9 @@
                                 </g>
                                 <!-- 3 · obvod hrudníku -->
                                 <g class="mira-marker" data-mira="muz-3">
-                                    <ellipse class="dash" cx="105" cy="115" rx="35" ry="6"/>
-                                    <line class="lead" x1="38" y1="113" x2="68" y2="115" marker-end="url(#ld-mf)"/>
-                                    <text class="num" x="31" y="112">3</text>
+                                    <ellipse class="dash" cx="105" cy="115" rx="39" ry="6"/>
+                                    <line class="lead" x1="34" y1="113" x2="64" y2="115" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="27" y="112">3</text>
                                 </g>
                                 <!-- 4 · obvod pasu -->
                                 <g class="mira-marker" data-mira="muz-4">
@@ -141,16 +141,16 @@
                                 </g>
                                 <!-- 6 · délka ramene a ruky -->
                                 <g class="mira-marker" data-mira="muz-6">
-                                    <!-- délka ramene a ruky – pravá paže -->
-                                    <path d="M136,75 Q150,92 153,122 L154,166" marker-end="url(#ah-mf)"/>
-                                    <path d="M134,75 L119,68" marker-end="url(#ah-mf)"/>
-                                    <line class="lead" x1="215" y1="132" x2="157" y2="142" marker-end="url(#ld-mf)"/>
-                                    <text class="num" x="222" y="130">6</text>
+                                    <!-- délka ramene a ruky – pravá paže (celá délka) -->
+                                    <path d="M140,75 Q153,92 155,124 L156,250" marker-end="url(#ah-mf)"/>
+                                    <path d="M138,75 L123,67" marker-end="url(#ah-mf)"/>
+                                    <line class="lead" x1="215" y1="174" x2="159" y2="196" marker-end="url(#ld-mf)"/>
+                                    <text class="num" x="222" y="172">6</text>
                                 </g>
                                 <!-- 7 · obvod paže * – pravá paže -->
                                 <g class="mira-marker" data-mira="muz-7">
-                                    <ellipse class="dash" cx="146" cy="118" rx="12" ry="4"/>
-                                    <line class="lead" x1="215" y1="82" x2="160" y2="116" marker-end="url(#ld-mf)"/>
+                                    <ellipse class="dash" cx="150" cy="120" rx="12" ry="4"/>
+                                    <line class="lead" x1="215" y1="82" x2="162" y2="118" marker-end="url(#ld-mf)"/>
                                     <text class="num" x="222" y="80">7</text>
                                 </g>
                                 <!-- 8 · obvod stehna * -->
@@ -190,12 +190,12 @@
                                 <ellipse class="hlava"    cx="105" cy="36" rx="16" ry="20"/>            <!-- hlava -->
                                 <path    class="vlasy"    d="M91,30 Q105,18 119,30"/>                    <!-- vlasy (pohled zezadu) -->
                                 <path    class="krk"      d="M98,55 L98,64 M112,55 L112,64"/>            <!-- krk -->
-                                <path    class="trup"     d="M98,63 Q84,65 74,75 Q67,87 71,102 L77,152 Q73,180 78,208 L132,208 Q137,180 133,152 L139,102 Q143,87 136,75 Q126,65 112,63 Z"/> <!-- trup -->
+                                <path    class="trup"     d="M98,62 Q80,64 69,75 Q60,88 65,104 L75,152 Q71,180 76,208 L134,208 Q139,180 135,152 L145,104 Q150,88 141,75 Q130,64 112,62 Z"/> <!-- trup (robustnější ramena + hrudník) -->
                                 <path    class="noha-l"   d="M82,208 Q75,270 80,330 L83,410 L96,410 Q98,350 99,290 L100,212"/>  <!-- levá noha -->
                                 <path    class="noha-p"   d="M128,208 Q135,270 130,330 L127,410 L114,410 Q112,350 111,290 L110,212"/> <!-- pravá noha -->
                                 <path    class="chodidla" d="M83,410 L74,418 M96,410 L96,418 M127,410 L136,418 M114,410 L114,418"/> <!-- chodidla -->
-                                <path    class="paze-l"   d="M74,76 Q60,92 57,122 L56,168 Q56,180 61,181 L67,181 Q71,150 73,122 Q75,100 79,90"/>     <!-- levá paže -->
-                                <path    class="paze-p"   d="M136,76 Q150,92 153,122 L154,168 Q154,180 149,181 L143,181 Q139,150 137,122 Q135,100 131,90"/> <!-- pravá paže -->
+                                <path    class="paze-l"   d="M70,76 Q57,92 55,124 L54,196 Q53,228 58,252 L64,254 Q69,228 70,194 Q70,146 72,122 Q74,100 79,90"/>     <!-- levá paže – ~60 % výšky -->
+                                <path    class="paze-p"   d="M140,76 Q153,92 155,124 L156,196 Q157,228 152,252 L146,254 Q141,228 140,194 Q140,146 138,122 Q136,100 131,90"/> <!-- pravá paže – ~60 % výšky -->
                                 <path    class="ground"   d="M45,418 L205,418"/>                          <!-- podlaha -->
                             </g>
 
@@ -209,9 +209,9 @@
                                 </g>
                                 <!-- 9 · šíře zad -->
                                 <g class="mira-marker" data-mira="muz-9">
-                                    <line x1="75" y1="108" x2="135" y2="108" marker-start="url(#ah-mb)" marker-end="url(#ah-mb)"/>
-                                    <line class="lead" x1="105" y1="90" x2="105" y2="104" marker-end="url(#ld-mb)"/>
-                                    <text class="num" x="105" y="84">9</text>
+                                    <line x1="69" y1="106" x2="141" y2="106" marker-start="url(#ah-mb)" marker-end="url(#ah-mb)"/>
+                                    <line class="lead" x1="105" y1="88" x2="105" y2="102" marker-end="url(#ld-mb)"/>
+                                    <text class="num" x="105" y="82">9</text>
                                 </g>
                                 <!-- 5 · obvod sedu -->
                                 <g class="mira-marker" data-mira="muz-5">
@@ -247,8 +247,8 @@
                                 <path    class="noha-l"   d="M84,206 Q78,270 83,330 L86,408 L97,408 Q99,350 100,290 L101,210"/>  <!-- levá noha -->
                                 <path    class="noha-p"   d="M126,206 Q132,270 127,330 L124,408 L113,408 Q111,350 110,290 L109,210"/> <!-- pravá noha -->
                                 <path    class="chodidla" d="M86,408 L78,416 M97,408 L97,416 M124,408 L132,416 M113,408 L113,416"/> <!-- chodidla -->
-                                <path    class="paze-l"   d="M76,74 Q63,90 60,120 L59,165 Q59,177 64,178 L69,178 Q72,148 74,120 Q76,100 80,90"/>     <!-- levá paže -->
-                                <path    class="paze-p"   d="M134,74 Q147,90 150,120 L151,165 Q151,177 146,178 L141,178 Q138,148 136,120 Q134,100 130,90"/> <!-- pravá paže -->
+                                <path    class="paze-l"   d="M76,74 Q63,90 60,120 L58,193 Q57,226 62,250 L68,252 Q73,226 74,191 Q74,142 74,120 Q76,100 80,90"/>     <!-- levá paže – prodloužena -->
+                                <path    class="paze-p"   d="M134,74 Q147,90 150,120 L151,193 Q152,226 147,250 L141,252 Q137,226 136,191 Q136,142 136,120 Q134,100 130,90"/> <!-- pravá paže – prodloužena -->
                                 <path    class="ground"   d="M45,416 L205,416"/>                          <!-- podlaha -->
                             </g>
 
@@ -280,11 +280,11 @@
                                 </g>
                                 <!-- 5 · délka ramene a ruky -->
                                 <g class="mira-marker" data-mira="zena-5">
-                                    <!-- délka ramene a ruky – pravá paže -->
-                                    <path d="M134,74 Q147,90 150,120 L151,163" marker-end="url(#ah-zf)"/>
+                                    <!-- délka ramene a ruky – pravá paže (celá délka) -->
+                                    <path d="M134,74 Q147,90 150,120 L151,246" marker-end="url(#ah-zf)"/>
                                     <path d="M132,73 L118,66" marker-end="url(#ah-zf)"/>
-                                    <line class="lead" x1="215" y1="132" x2="153" y2="142" marker-end="url(#ld-zf)"/>
-                                    <text class="num" x="222" y="130">5</text>
+                                    <line class="lead" x1="215" y1="172" x2="153" y2="193" marker-end="url(#ld-zf)"/>
+                                    <text class="num" x="222" y="170">5</text>
                                 </g>
                                 <!-- 6 · obvod paže * – pravá paže -->
                                 <g class="mira-marker" data-mira="zena-6">
