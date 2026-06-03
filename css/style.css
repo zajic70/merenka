@@ -1,15 +1,25 @@
 /* ===== Měřenka SSI – styly nad Bootstrapem ===== */
 
 :root {
-    --ssi-red: #b5453a;
-    --ssi-head-muz: #e8e0bf;   /* béžová záhlaví muž (jako v předloze) */
-    --ssi-head-zena: #e9d3c7;  /* růžovo-béžová záhlaví žena */
+    --muz-bg:  #cfe2ff;   /* pastelová modrá – muž */
+    --muz-fg:  #084298;
+    --zena-bg: #ffe0c2;   /* pastelová oranžová – žena */
+    --zena-fg: #8a4b00;
     --mira-active: #0d6efd;    /* modrá – zvýraznění aktivní míry */
 }
 
-/* Záhlaví tabulek */
-.tbl-head-muz  { background: var(--ssi-head-muz); }
-.tbl-head-zena { background: var(--ssi-head-zena); }
+/* Záhlaví tabulek – pastelové */
+.tbl-head-muz  { background: var(--muz-bg); }
+.tbl-head-zena { background: var(--zena-bg); }
+
+/* Označení pohlaví – pastelové odstíny */
+.badge-muz  { background: var(--muz-bg);  color: var(--muz-fg); }
+.badge-zena { background: var(--zena-bg); color: var(--zena-fg); }
+
+.btn-mira-muz  { color: var(--muz-fg);  border: 1px solid var(--muz-fg);  background:#fff; }
+.btn-mira-muz:hover  { background: var(--muz-bg);  color: var(--muz-fg); }
+.btn-mira-zena { color: var(--zena-fg); border: 1px solid var(--zena-fg); background:#fff; }
+.btn-mira-zena:hover { background: var(--zena-bg); color: var(--zena-fg); }
 
 .mira-table th { background: rgba(0, 0, 0, .03); }
 .mira-table .mira-num { text-align: center; color: #666; }

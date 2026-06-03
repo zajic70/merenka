@@ -19,69 +19,170 @@
 
     <form id="miry" method="post" novalidate>
 
-        <div class="row g-4">
+        <!-- ===================== KOŠÍK (přehled položek) ===================== -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-bag"></i> Přehled položek
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover align-middle mb-0" id="kosik">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:2.5rem">#</th>
+                            <th>Položka</th>
+                            <th style="width:6rem">Velikost</th>
+                            <th>Míry</th>
+                            <th style="width:8rem" class="no-print text-end">Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-kosik-id="1" data-pohlavi="muz" data-nazev="Sako pánské">
+                            <td class="text-muted">1.</td>
+                            <td><span class="badge badge-muz me-1">M</span> Sako pánské</td>
+                            <td>50</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-muz"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="2" data-pohlavi="muz" data-nazev="Košile pánská dl. rukáv">
+                            <td class="text-muted">2.</td>
+                            <td><span class="badge badge-muz me-1">M</span> Košile pánská dl. rukáv</td>
+                            <td>44–48</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-muz"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="3" data-pohlavi="muz" data-nazev="Kalhoty pánské">
+                            <td class="text-muted">3.</td>
+                            <td><span class="badge badge-muz me-1">M</span> Kalhoty pánské</td>
+                            <td>50</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-muz"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="4" data-pohlavi="muz" data-nazev="Vesta pánská">
+                            <td class="text-muted">4.</td>
+                            <td><span class="badge badge-muz me-1">M</span> Vesta pánská</td>
+                            <td>50</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-muz"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="5" data-pohlavi="zena" data-nazev="Halenka dámská dl. rukáv">
+                            <td class="text-muted">5.</td>
+                            <td><span class="badge badge-zena me-1">Ž</span> Halenka dámská dl. rukáv</td>
+                            <td>38–40</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-zena"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="6" data-pohlavi="zena" data-nazev="Halenka dámská kr. rukáv">
+                            <td class="text-muted">6.</td>
+                            <td><span class="badge badge-zena me-1">Ž</span> Halenka dámská kr. rukáv</td>
+                            <td>38–40</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-zena"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                        <tr data-kosik-id="7" data-pohlavi="zena" data-nazev="Sukně dámská">
+                            <td class="text-muted">7.</td>
+                            <td><span class="badge badge-zena me-1">Ž</span> Sukně dámská</td>
+                            <td>40</td>
+                            <td><span class="miry-text small text-muted fst-italic">—</span></td>
+                            <td class="no-print text-end">
+                                <button type="button" class="btn btn-sm btn-mira btn-mira-zena"><i class="bi bi-rulers"></i> Měřenka</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            <!-- ===================== TABULKA MUŽ ===================== -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header tbl-head-muz fw-semibold">Muž</div>
-                    <div class="card-body">
-                        <table class="table table-sm table-bordered align-middle mb-2 mira-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:3rem">#</th>
-                                    <th>Název rozměru</th>
-                                    <th style="width:8rem">Míra v cm</th>
-                                </tr>
-                            </thead>
-                            <tbody><!-- řádky generuje app.js --></tbody>
-                        </table>
-                        <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+        <!-- info: po reloadu byla načtena dříve uložená data -->
+        <div id="load-info" class="alert alert-info alert-dismissible d-none" role="alert">
+            <i class="bi bi-info-circle"></i> Načetli jsme dříve rozpracovaná data košíku (uložená v tomto prohlížeči).
+            Úpravy se průběžně ukládají; obnovením stránky se na ně dotážeme, ať je nepřepíšete omylem.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+        </div>
+
+        <!-- ===================== MĚŘENÍ (otevírá se z košíku) ===================== -->
+        <div id="mereni-sekce">
+
+        <!-- hint než se vybere položka -->
+        <div id="mereni-hint" class="alert alert-light border text-center text-muted">
+            <i class="bi bi-arrow-up"></i> Vyberte položku v košíku a klikněte na <strong>Měřenka</strong> – níže se otevřou míry pro správné pohlaví.
+        </div>
+
+        <!-- banner s aktivní položkou -->
+        <div id="mereni-banner" class="alert alert-light border d-none align-items-center justify-content-between" role="alert">
+            <span>Vyplňujete míry pro: <strong id="mereni-nazev"></strong> <span id="mereni-pohlavi" class="badge"></span></span>
+            <button type="button" class="btn btn-sm btn-outline-secondary no-print" id="mereni-zavrit">Hotovo</button>
+        </div>
+
+        <!-- ===== MUŽ: tabulka + ilustrace vedle sebe ===== -->
+        <div class="gender-block d-none" data-gender="muz">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header tbl-head-muz fw-semibold">Muž</div>
+                        <div class="card-body">
+                            <table class="table table-sm table-bordered align-middle mb-2 mira-table">
+                                <thead><tr><th style="width:3rem">#</th><th>Název rozměru</th><th style="width:8rem">Míra v cm</th></tr></thead>
+                                <tbody><!-- řádky generuje app.js --></tbody>
+                            </table>
+                            <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- ===================== TABULKA ŽENA ===================== -->
-            <div class="col-lg-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header tbl-head-zena fw-semibold">Žena</div>
-                    <div class="card-body">
-                        <table class="table table-sm table-bordered align-middle mb-2 mira-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:3rem">#</th>
-                                    <th>Název rozměru</th>
-                                    <th style="width:8rem">Míra v cm</th>
-                                </tr>
-                            </thead>
-                            <tbody><!-- řádky generuje app.js --></tbody>
-                        </table>
-                        <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+                <div class="col-lg-7">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="row text-center g-2 figures" id="fig-slot-muz"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===================== ODESLÁNÍ ===================== -->
-        <div class="mt-4 no-print">
-            <button type="submit" class="btn btn-outline-secondary btn-lg w-100">
-                <i class="bi bi-save"></i> Uložit míry (zatím jen ukázka)
-            </button>
+        <!-- ===== ŽENA: tabulka + ilustrace vedle sebe ===== -->
+        <div class="gender-block d-none" data-gender="zena">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header tbl-head-zena fw-semibold">Žena</div>
+                        <div class="card-body">
+                            <table class="table table-sm table-bordered align-middle mb-2 mira-table">
+                                <thead><tr><th style="width:3rem">#</th><th>Název rozměru</th><th style="width:8rem">Míra v cm</th></tr></thead>
+                                <tbody><!-- řádky generuje app.js --></tbody>
+                            </table>
+                            <p class="small text-muted mb-0">* doplňkové míry u nestandardní postavy</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="row text-center g-2 figures" id="fig-slot-zena"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- ===================== ILUSTRACE ===================== -->
-        <div class="card shadow-sm mt-4">
-            <div class="card-header fw-semibold">Vyobrazení měřených rozměrů</div>
-            <div class="card-body">
-                <p class="small text-secondary">
-                    Tip: klikněte na číslo v obrázku nebo na pole v tabulce – příslušná míra se zvýrazní.
-                </p>
+        <!-- ===================== ILUSTRACE (skrytý zdroj – JS přesune k tabulkám) ===================== -->
+        <div id="fig-zdroj" class="d-none">
                 <div class="row text-center g-3 figures">
 
                     <!-- ================================================= -->
                     <!-- ===============  MUŽ – ZEPŘEDU  ================== -->
                     <!-- ================================================= -->
-                    <div class="col-md-4">
+                    <div class="col-md-4 fig-col" data-gender="muz">
                         <h2 class="h6 text-secondary">Muž – zepředu</h2>
                         <svg viewBox="0 0 240 470" class="figure-svg" data-fig="muz" aria-label="Muž zepředu">
 
@@ -174,7 +275,7 @@
                     <!-- ================================================= -->
                     <!-- ===============  MUŽ – ZEZADU  =================== -->
                     <!-- ================================================= -->
-                    <div class="col-md-4">
+                    <div class="col-md-4 fig-col" data-gender="muz">
                         <h2 class="h6 text-secondary">Muž – zezadu</h2>
                         <svg viewBox="0 0 240 470" class="figure-svg" data-fig="muz-zad" aria-label="Muž zezadu">
                             <defs>
@@ -227,7 +328,7 @@
                     <!-- ================================================= -->
                     <!-- ===============  ŽENA – ZEPŘEDU  ================= -->
                     <!-- ================================================= -->
-                    <div class="col-md-4">
+                    <div class="col-md-4 fig-col" data-gender="zena">
                         <h2 class="h6 text-secondary">Žena – zepředu</h2>
                         <svg viewBox="0 0 240 470" class="figure-svg" data-fig="zena" aria-label="Žena zepředu">
                             <defs>
@@ -310,8 +411,9 @@
                         </svg>
                     </div>
                 </div>
-            </div>
-        </div>
+        </div><!-- /#fig-zdroj -->
+
+        </div><!-- /#mereni-sekce -->
 
         <!-- ===================== JAK SPRÁVNĚ MĚŘIT ===================== -->
         <div class="card shadow-sm mt-4">
@@ -357,24 +459,13 @@
             </div>
         </div>
 
-    </form>
-</div>
+        <!-- ===================== DATA (JSON pro pozdější odeslání do DB) ===================== -->
+        <details class="mt-4 no-print">
+            <summary class="text-muted small">Data k odeslání (JSON)</summary>
+            <textarea id="kosik-json" name="kosik_json" class="form-control font-monospace mt-2" rows="4" readonly>{}</textarea>
+        </details>
 
-<!-- Okno s přehledem zadaných měr (zatím místo odeslání do DB) -->
-<div class="modal fade" id="dataModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Zadané míry</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
-            </div>
-            <div class="modal-body" id="dataModalBody"></div>
-            <div class="modal-footer">
-                <small class="text-muted me-auto">Toto je jen náhled – odeslání do databáze přidáme v dalším kroku.</small>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
-            </div>
-        </div>
-    </div>
+    </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

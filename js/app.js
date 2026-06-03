@@ -1,32 +1,48 @@
-/* ===== Měřenka SSI – interaktivita ===== */
+/* ===== Měřenka VAVI – interaktivita ===== */
 (function () {
     'use strict';
 
-    // Definice rozměrů (číslo, popisek). Číslo zároveň odpovídá značce v SVG (muz-1, zena-1, ...).
+    // ---- Zkratky pro výpis měr v košíku ----
+    const ZKRATKY = {
+        muz:  { 1:'výš',  2:'krk',  3:'hrud', 4:'pas',  5:'sed',  6:'ruk',  7:'pže',  8:'sth', 9:'záda', 10:'krok' },
+        zena: { 1:'výš',  2:'hrud', 3:'pas',  4:'sed',  5:'ruk',  6:'pže',  7:'sth',  8:'krok' }
+    };
+
+    // Definice rozměrů (číslo, popisek, min/max dle běžné populace v cm).
+    // Číslo zároveň odpovídá značce v SVG (muz-1, zena-1, ...).
     const MIRY = {
         muz: [
-            { n: 1,  label: 'výška postavy' },
-            { n: 2,  label: 'obvod krku' },
-            { n: 3,  label: 'obvod hrudníku' },
-            { n: 4,  label: 'obvod pasu' },
-            { n: 5,  label: 'obvod sedu' },
-            { n: 6,  label: 'délka ramene a ruky' },
-            { n: 7,  label: 'obvod paže *' },
-            { n: 8,  label: 'obvod stehna *' },
-            { n: 9,  label: 'šíře zad' },
-            { n: 10, label: 'kroková délka' },
+            { n: 1,  label: 'výška postavy',        min: 150, max: 210 },
+            { n: 2,  label: 'obvod krku',           min: 33,  max: 55  },
+            { n: 3,  label: 'obvod hrudníku',       min: 80,  max: 140 },
+            { n: 4,  label: 'obvod pasu',           min: 65,  max: 150 },
+            { n: 5,  label: 'obvod sedu',           min: 80,  max: 140 },
+            { n: 6,  label: 'délka ramene a ruky',  min: 50,  max: 80  },
+            { n: 7,  label: 'obvod paže *',         min: 22,  max: 50  },
+            { n: 8,  label: 'obvod stehna *',       min: 42,  max: 80  },
+            { n: 9,  label: 'šíře zad',             min: 35,  max: 60  },
+            { n: 10, label: 'kroková délka',        min: 68,  max: 95  },
         ],
         zena: [
-            { n: 1, label: 'výška postavy' },
-            { n: 2, label: 'obvod hrudníku' },
-            { n: 3, label: 'obvod pasu' },
-            { n: 4, label: 'obvod sedu' },
-            { n: 5, label: 'délka ramene a ruky' },
-            { n: 6, label: 'obvod paže *' },
-            { n: 7, label: 'obvod stehna *' },
-            { n: 8, label: 'kroková délka' },
+            { n: 1, label: 'výška postavy',         min: 145, max: 195 },
+            { n: 2, label: 'obvod hrudníku',        min: 75,  max: 130 },
+            { n: 3, label: 'obvod pasu',            min: 58,  max: 130 },
+            { n: 4, label: 'obvod sedu',            min: 80,  max: 140 },
+            { n: 5, label: 'délka ramene a ruky',   min: 48,  max: 75  },
+            { n: 6, label: 'obvod paže *',          min: 20,  max: 48  },
+            { n: 7, label: 'obvod stehna *',        min: 42,  max: 75  },
+            { n: 8, label: 'kroková délka',         min: 64,  max: 92  },
         ],
     };
+
+    // Standardní konfekční velikost (muž ~50/L, žena ~38/M) – předvyplní se při prvním otevření položky.
+    const DEFAULTS = {
+        muz:  { 1:182, 2:41, 3:100, 4:88, 5:102, 6:64, 7:32, 8:58, 9:45, 10:82 },
+        zena: { 1:168, 2:92, 3:74, 4:100, 5:60, 6:28, 7:58, 8:78 }
+    };
+
+    // Klíč pro uložení do prohlížeče
+    const STORAGE_KEY = 'merenka_vavi_kosik_v1';
 
     // Vykreslení řádků tabulky pro dané pohlaví do první nalezené tabulky v kartě.
     function renderRows(pohlavi, tbody) {
@@ -39,9 +55,12 @@
                 '<td>' + m.label + '</td>' +
                 '<td>' +
                     '<div class="input-group input-group-sm">' +
-                        '<input type="number" step="0.1" min="0" class="form-control" ' +
+                        '<input type="number" step="1" min="' + m.min + '" max="' + m.max + '" class="form-control" ' +
                             'name="miry_' + pohlavi + '[' + m.n + ']" ' +
-                            'data-mira="' + key + '" aria-label="' + m.label + '">' +
+                            'data-mira="' + key + '" ' +
+                            'title="běžné rozmezí ' + m.min + '–' + m.max + ' cm" ' +
+                            'placeholder="' + m.min + '–' + m.max + '" ' +
+                            'aria-label="' + m.label + '">' +
                         '<span class="input-group-text">cm</span>' +
                     '</div>' +
                 '</td>';
@@ -59,6 +78,16 @@
     const zenaBody = tbodyFor('zena');
     if (muzBody) renderRows('muz', muzBody);
     if (zenaBody) renderRows('zena', zenaBody);
+
+    // ---- Přesun ilustrací ze skrytého zdroje k tabulkám (vedle vstupů) ----
+    (function presunIlustrace() {
+        var slotMuz = document.getElementById('fig-slot-muz');
+        var slotZena = document.getElementById('fig-slot-zena');
+        document.querySelectorAll('#fig-zdroj .fig-col').forEach(function (col) {
+            if (col.dataset.gender === 'zena') { if (slotZena) slotZena.appendChild(col); }
+            else { if (slotMuz) slotMuz.appendChild(col); }
+        });
+    })();
 
     // ---- Šedé kolečko + velká oblast pro klik pod každým číslem ----
     const NS = 'http://www.w3.org/2000/svg';
@@ -119,34 +148,168 @@
         });
     });
 
-    // ---- Odeslání (zatím jen ukázka – data vypíšeme do okna) ----
-    // Sestaví HTML tabulku vyplněných měr pro jedno pohlaví.
-    function tabulkaMer(pohlavi, nadpis) {
-        const radky = MIRY[pohlavi].map(function (m) {
-            const inp = document.querySelector('input[name="miry_' + pohlavi + '[' + m.n + ']"]');
-            const val = inp && inp.value ? inp.value + ' cm' : '<span class="text-muted">—</span>';
-            return '<tr><td class="text-muted">' + m.n + '.</td><td>' + m.label + '</td>' +
-                   '<td class="text-end">' + val + '</td></tr>';
-        }).join('');
-        return '<h6>' + nadpis + '</h6>' +
-               '<table class="table table-sm"><tbody>' + radky + '</tbody></table>';
+    // ====== Košík ↔ míry dole na stránce ======
+    var kosikData = {};        // { rowId: { n: hodnota } }
+    var aktivniRadek = null;   // id řádku košíku
+    var aktivniPohlavi = null; // 'muz' | 'zena'
+
+    var hint    = document.getElementById('mereni-hint');
+    var banner  = document.getElementById('mereni-banner');
+    var sekce   = document.getElementById('mereni-sekce');
+
+    // Zobraz pouze blok (tabulka + ilustrace) daného pohlaví
+    function zobrazPohlavi(pohlavi) {
+        document.querySelectorAll('.gender-block').forEach(function (el) {
+            el.classList.toggle('d-none', el.dataset.gender !== pohlavi);
+        });
+        if (hint) hint.classList.add('d-none');
     }
 
-    const form = document.getElementById('miry');
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const html = tabulkaMer('muz', 'Muž') + tabulkaMer('zena', 'Žena');
-            const body = document.getElementById('dataModalBody');
-            if (body) body.innerHTML = html;
+    // Vstupní pole míry pro pohlaví (tabulka dole)
+    function vstup(pohlavi, n) {
+        return document.querySelector('input[name="miry_' + pohlavi + '[' + n + ']"]');
+    }
 
-            const modalEl = document.getElementById('dataModal');
-            if (modalEl && window.bootstrap) {
-                bootstrap.Modal.getOrCreateInstance(modalEl).show();
-            } else {
-                // záloha, kdyby Bootstrap nebyl k dispozici
-                alert(form.querySelector ? body.innerText : 'Data připravena.');
-            }
+    // Text se zkratkami z uložených dat řádku
+    function textZkratek(pohlavi, data) {
+        return MIRY[pohlavi].map(function (m) {
+            var v = data[m.n];
+            return (v !== undefined && v !== '') ? ZKRATKY[pohlavi][m.n] + '.' + v : null;
+        }).filter(Boolean).join('  ');
+    }
+
+    // Zapiš text do řádku košíku
+    function zapisDoRadku(rowId, pohlavi) {
+        var row = document.querySelector('#kosik tr[data-kosik-id="' + rowId + '"]');
+        if (!row) return;
+        var span = row.querySelector('.miry-text');
+        if (!span) return;
+        var t = textZkratek(pohlavi, kosikData[rowId] || {});
+        if (t) {
+            span.textContent = t;
+            span.classList.remove('text-muted', 'fst-italic');
+            span.classList.add('text-dark');
+        } else {
+            span.textContent = '—';
+            span.classList.add('text-muted', 'fst-italic');
+            span.classList.remove('text-dark');
+        }
+    }
+
+    // Naplň tabulku dole z uložených dat řádku
+    function nactiDoTabulky(pohlavi, data) {
+        MIRY[pohlavi].forEach(function (m) {
+            var inp = vstup(pohlavi, m.n);
+            if (inp) inp.value = (data && data[m.n] !== undefined) ? data[m.n] : '';
         });
     }
+
+    // ---- Ukládání jako JSON (text + prohlížeč) ----
+    var jsonField = document.getElementById('kosik-json');
+
+    function ulozData() {
+        var json = JSON.stringify(kosikData);
+        if (jsonField) jsonField.value = json;
+        try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { /* localStorage nedostupné */ }
+    }
+
+    function maNejakaData() {
+        return Object.keys(kosikData).some(function (id) {
+            return kosikData[id] && Object.keys(kosikData[id]).length > 0;
+        });
+    }
+
+    // ---- Obnova dříve uložených dat po reloadu ----
+    (function obnovData() {
+        var json = null;
+        try { json = localStorage.getItem(STORAGE_KEY); } catch (e) { /* nic */ }
+        if (!json) return;
+        try { kosikData = JSON.parse(json) || {}; } catch (e) { kosikData = {}; return; }
+
+        // doplň texty do řádků košíku podle pohlaví řádku
+        document.querySelectorAll('#kosik tr[data-kosik-id]').forEach(function (tr) {
+            var id = tr.dataset.kosikId;
+            if (kosikData[id] && Object.keys(kosikData[id]).length) {
+                zapisDoRadku(id, tr.dataset.pohlavi);
+            }
+        });
+        if (jsonField) jsonField.value = json;
+
+        // info, že byla načtena uložená data
+        var info = document.getElementById('load-info');
+        if (info && maNejakaData()) info.classList.remove('d-none');
+    })();
+
+    // Klik na „Měřenka" v košíku → otevři správné pohlaví dole
+    document.querySelectorAll('.btn-mira').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var tr = btn.closest('tr');
+            aktivniRadek = tr.dataset.kosikId;
+            aktivniPohlavi = tr.dataset.pohlavi;
+            if (!kosikData[aktivniRadek]) kosikData[aktivniRadek] = {};
+
+            // První otevření bez dat → předvyplň standardní konfekční velikost
+            if (Object.keys(kosikData[aktivniRadek]).length === 0) {
+                MIRY[aktivniPohlavi].forEach(function (m) {
+                    kosikData[aktivniRadek][m.n] = DEFAULTS[aktivniPohlavi][m.n];
+                });
+                zapisDoRadku(aktivniRadek, aktivniPohlavi);
+                ulozData();
+            }
+
+            zobrazPohlavi(aktivniPohlavi);
+            nactiDoTabulky(aktivniPohlavi, kosikData[aktivniRadek]);
+
+            // banner s názvem položky
+            document.getElementById('mereni-nazev').textContent = tr.dataset.nazev || '';
+            var bdg = document.getElementById('mereni-pohlavi');
+            bdg.textContent = aktivniPohlavi === 'muz' ? 'Muž' : 'Žena';
+            bdg.className = 'badge ' + (aktivniPohlavi === 'muz' ? 'badge-muz' : 'badge-zena');
+            banner.classList.remove('d-none');
+            banner.classList.add('d-flex');
+
+            // zvýrazni aktivní řádek košíku
+            document.querySelectorAll('#kosik tr').forEach(function (r) { r.classList.remove('table-active'); });
+            tr.classList.add('table-active');
+
+            if (sekce) sekce.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Živý zápis při psaní do tabulek dole → do aktivního řádku košíku
+    ['muz', 'zena'].forEach(function (pohlavi) {
+        MIRY[pohlavi].forEach(function (m) {
+            var inp = vstup(pohlavi, m.n);
+            if (!inp) return;
+            inp.addEventListener('input', function () {
+                if (!aktivniRadek || aktivniPohlavi !== pohlavi) return;
+                if (inp.value === '') delete kosikData[aktivniRadek][m.n];
+                else kosikData[aktivniRadek][m.n] = inp.value;
+                zapisDoRadku(aktivniRadek, pohlavi);
+                ulozData();
+            });
+        });
+    });
+
+    // „Hotovo" → schovej míry, zpět na hint
+    var zavrit = document.getElementById('mereni-zavrit');
+    if (zavrit) {
+        zavrit.addEventListener('click', function () {
+            aktivniRadek = null;
+            aktivniPohlavi = null;
+            document.querySelectorAll('.gender-block').forEach(function (el) { el.classList.add('d-none'); });
+            banner.classList.add('d-none');
+            banner.classList.remove('d-flex');
+            if (hint) hint.classList.remove('d-none');
+            document.querySelectorAll('#kosik tr').forEach(function (r) { r.classList.remove('table-active'); });
+        });
+    }
+
+    // ---- Ošetření reloadu: upozorni, že se přepíšou rozpracovaná data ----
+    window.addEventListener('beforeunload', function (e) {
+        if (maNejakaData()) {
+            e.preventDefault();
+            e.returnValue = ''; // prohlížeč zobrazí standardní dotaz před obnovením/opuštěním
+        }
+    });
 })();
