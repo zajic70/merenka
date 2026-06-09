@@ -305,6 +305,97 @@
         });
     }
 
+    // ---- PDF protokol o naměřených údajích ----
+    function radkyKosiku() {
+        return [].map.call(document.querySelectorAll('#kosik tbody tr[data-kosik-id]'), function (tr) {
+            return {
+                id: tr.dataset.kosikId,
+                pohlavi: tr.dataset.pohlavi,
+                nazev: tr.dataset.nazev || '',
+                velikost: (tr.cells[2] ? tr.cells[2].textContent.trim() : '')
+            };
+        });
+    }
+
+    function miryTabulka(pohlavi, data) {
+        var radky = MIRY[pohlavi].map(function (m) {
+            var v = data && data[m.n] !== undefined && data[m.n] !== '' ? data[m.n] + ' cm' : '–';
+            return '<tr><td class="c">' + m.n + '.</td><td>' + m.label + '</td><td class="v">' + v + '</td></tr>';
+        }).join('');
+        return '<table class="miry"><thead><tr><th class="c">#</th><th>Rozměr</th><th class="v">Míra</th></tr></thead><tbody>' + radky + '</tbody></table>';
+    }
+
+    function vytvorProtokol() {
+        var datum = new Date().toLocaleDateString('cs-CZ');
+        var polozky = radkyKosiku();
+        var logoUrl = new URL('img/logo.svg', location.href).href;
+
+        var prehled = polozky.map(function (p, i) {
+            var data = kosikData[p.id] || {};
+            var ma = Object.keys(data).length > 0;
+            var txt = ma ? textZkratek(p.pohlavi, data) : '<span class="muted">nevyplněno</span>';
+            return '<tr><td class="c">' + (i + 1) + '.</td><td>' + p.nazev +
+                   '</td><td class="c">' + (p.pohlavi === 'muz' ? 'M' : 'Ž') + '</td><td class="c">' + p.velikost +
+                   '</td><td>' + txt + '</td></tr>';
+        }).join('');
+
+        var detaily = polozky.filter(function (p) { return kosikData[p.id] && Object.keys(kosikData[p.id]).length; })
+            .map(function (p, i) {
+                return '<div class="detail"><h3>' + p.nazev + ' <small>(' + (p.pohlavi === 'muz' ? 'muž' : 'žena') +
+                       ', vel. ' + p.velikost + ')</small></h3>' + miryTabulka(p.pohlavi, kosikData[p.id]) + '</div>';
+            }).join('');
+        if (!detaily) detaily = '<p class="muted">Zatím nejsou vyplněné žádné míry.</p>';
+
+        var html =
+'<!DOCTYPE html><html lang="cs"><head><meta charset="UTF-8"><title>Protokol o naměřených údajích</title>' +
+'<style>' +
+'*{box-sizing:border-box}' +
+'body{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;margin:0;padding:24px;font-size:12px}' +
+'.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1a1a;padding-bottom:12px;margin-bottom:16px}' +
+'.hd img{height:34px}' +
+'.hd h1{font-size:18px;margin:0 0 2px}' +
+'.hd .meta{font-size:11px;color:#555}' +
+'.osoba{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0 0 18px}' +
+'.osoba div{border-bottom:1px solid #bbb;padding:10px 2px 3px;font-size:11px;color:#777}' +
+'h2{font-size:13px;margin:18px 0 6px;border-left:4px solid #0d6efd;padding-left:8px}' +
+'table{border-collapse:collapse;width:100%}' +
+'.prehled th,.prehled td{border:1px solid #ccc;padding:5px 7px;text-align:left}' +
+'.prehled th{background:#f0f3f7}' +
+'.detail{break-inside:avoid;margin:10px 0 14px}' +
+'.detail h3{font-size:12px;margin:0 0 4px}.detail small{color:#777;font-weight:normal}' +
+'.miry{width:auto;min-width:260px}.miry th,.miry td{border:1px solid #ddd;padding:3px 8px}' +
+'.miry th{background:#f7f7f7;font-size:11px}' +
+'.detaily{display:flex;flex-wrap:wrap;gap:8px 24px}' +
+'.c{text-align:center;color:#555;width:1%;white-space:nowrap}.v{text-align:right;white-space:nowrap}' +
+'.muted{color:#999;font-style:italic}' +
+'.podpis{display:flex;justify-content:space-between;margin-top:40px;gap:40px}' +
+'.podpis div{flex:1;border-top:1px solid #888;padding-top:4px;text-align:center;font-size:11px;color:#666}' +
+'.pozn{margin-top:16px;font-size:10px;color:#777}' +
+'@media print{body{padding:0}}' +
+'</style></head><body>' +
+'<div class="hd"><div><h1>Protokol o naměřených údajích</h1>' +
+'<div class="meta">Měření postavy · vytvořeno ' + datum + '</div></div>' +
+'<img src="' + logoUrl + '" alt="VAVI"></div>' +
+'<div class="osoba"><div>Jméno a příjmení</div><div>Osobní číslo</div><div>Objekt / středisko</div><div>Datum měření</div></div>' +
+'<h2>Objednané položky</h2>' +
+'<table class="prehled"><thead><tr><th class="c">#</th><th>Položka</th><th class="c">Pohl.</th><th class="c">Vel.</th><th>Míry (zkratky)</th></tr></thead><tbody>' +
+prehled + '</tbody></table>' +
+'<h2>Naměřené rozměry</h2><div class="detaily">' + detaily + '</div>' +
+'<p class="pozn">* Doplňkové míry u nestandardní postavy. Naměřené míry neupravujte ani jedním směrem – výrobce oblečení s rezervou pro volný pohyb již počítá.</p>' +
+'<div class="podpis"><div>Změřil(a)</div><div>Podpis pracovníka</div><div>Datum</div></div>' +
+'</body></html>';
+
+        var w = window.open('', '_blank');
+        if (!w) { alert('Vyskakovací okno bylo zablokováno – povolte ho a zkuste znovu.'); return; }
+        w.document.open(); w.document.write(html); w.document.close();
+        w.onload = function () { w.focus(); w.print(); };
+        // fallback, kdyby onload nenaběhl
+        setTimeout(function () { try { w.focus(); w.print(); } catch (e) {} }, 600);
+    }
+
+    var btnProtokol = document.getElementById('btnProtokol');
+    if (btnProtokol) btnProtokol.addEventListener('click', vytvorProtokol);
+
     // ---- Ošetření reloadu / opuštění stránky: dotaz před ztrátou dat ----
     window.addEventListener('beforeunload', function (e) {
         if (maNejakaData()) {

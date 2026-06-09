@@ -21,8 +21,11 @@
 
         <!-- ===================== KOŠÍK (přehled položek) ===================== -->
         <div class="card shadow-sm mb-4">
-            <div class="card-header fw-semibold">
-                <i class="bi bi-bag"></i> Přehled položek
+            <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-bag"></i> Přehled položek</span>
+                <button type="button" id="btnProtokol" class="btn btn-sm btn-outline-secondary no-print">
+                    <i class="bi bi-file-earmark-pdf"></i> Protokol (PDF)
+                </button>
             </div>
             <div class="card-body p-0">
                 <table class="table table-sm table-hover align-middle mb-0" id="kosik">
