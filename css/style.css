@@ -59,6 +59,9 @@
 .figure-svg .dims .dash { stroke-dasharray: 4 3; }
 .figure-svg .dims .thin { stroke-width: 1; }
 
+/* pomocná čára (vodítko) */
+.figure-svg .pomoc { fill: none; stroke: #9a9a9a; stroke-width: 1; stroke-dasharray: 4 3; }
+
 /* odkazová čára od čísla k postavě – šedě */
 .figure-svg .dims .lead {
     stroke: #9a9a9a;

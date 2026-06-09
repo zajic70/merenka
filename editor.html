@@ -40,6 +40,8 @@
                 <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
                     <span>Změny</span>
                     <span>
+                        <button id="btnCara" class="btn btn-sm btn-outline-success">+ čára</button>
+                        <button id="btnSmaz" class="btn btn-sm btn-outline-danger">− smazat</button>
                         <button id="btnReset" class="btn btn-sm btn-outline-secondary">Reset</button>
                         <button id="btnExport" class="btn btn-sm btn-primary">Export</button>
                     </span>
@@ -63,7 +65,7 @@
         muz:{1:'výška postavy',2:'obvod krku',3:'obvod hrudníku',4:'obvod pasu',5:'obvod sedu',6:'délka ramene a ruky',7:'obvod paže',8:'obvod stehna',9:'šíře zad',10:'kroková délka'},
         zena:{1:'výška postavy',2:'obvod hrudníku',3:'obvod pasu',4:'obvod sedu',5:'délka ramene a ruky',6:'obvod paže',7:'obvod stehna',8:'kroková délka'}
     };
-    function nazev(m){var p=m.split('-');return (NAMES[p[0]==='zena'?'zena':'muz'][+p[1]]||m);}
+    function nazev(m){var p=m.split('-');if(p[0]==='cara')return 'pomocná čára';return (NAMES[p[0]==='zena'?'zena':'muz'][+p[1]]||m);}
 
     var changed = new Set();   // změněné markery (elementy)
     var selected = null;
@@ -226,9 +228,28 @@
 
     function cisty(m){
         var clone=m.cloneNode(true);
+        clone.classList.remove('sel');
         clone.querySelectorAll('.ui').forEach(function(x){x.remove();});
         return clone.outerHTML.replace(/\s+/g,' ').replace(/> </g,'>\n  <');
     }
+
+    // ---- Pomocné čáry (přidat / smazat) ----
+    var caraN=0;
+    document.getElementById('btnCara').addEventListener('click', function(){
+        var svg = selected ? selected.ownerSVGElement : document.querySelector('.figure-svg');
+        if(!svg) return;
+        var dims = svg.querySelector('.dims') || svg;
+        var g=document.createElementNS(SVGNS,'g'); g.setAttribute('class','mira-marker'); g.setAttribute('data-mira','cara-'+(++caraN));
+        var ln=document.createElementNS(SVGNS,'line'); ln.setAttribute('class','pomoc');
+        ln.setAttribute('x1',70); ln.setAttribute('y1',150); ln.setAttribute('x2',140); ln.setAttribute('y2',150);
+        g.appendChild(ln); dims.appendChild(g);
+        vybavMarker(g); oznac(g); zmena(g);
+    });
+    document.getElementById('btnSmaz').addEventListener('click', function(){
+        if(!selected || String(selected.dataset.mira).indexOf('cara-')!==0){ alert('Smazat lze jen vybranou pomocnou čáru.'); return; }
+        changed.delete(selected); selected.remove(); selected=null;
+        document.getElementById('selName').textContent='—'; renderReadout();
+    });
     document.getElementById('btnExport').addEventListener('click',function(){
         var out=[]; var byFig={};
         changed.forEach(function(m){var f=m.ownerSVGElement.getAttribute('data-fig');(byFig[f]=byFig[f]||[]).push(m);});
