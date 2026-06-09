@@ -305,11 +305,13 @@
         });
     }
 
-    // ---- Ošetření reloadu: upozorni, že se přepíšou rozpracovaná data ----
+    // ---- Ošetření reloadu / opuštění stránky: dotaz před ztrátou dat ----
     window.addEventListener('beforeunload', function (e) {
         if (maNejakaData()) {
+            var zprava = 'Máte rozpracované míry. Opravdu chcete opustit nebo obnovit stránku? Neuložené úpravy se mohou ztratit.';
             e.preventDefault();
-            e.returnValue = ''; // prohlížeč zobrazí standardní dotaz před obnovením/opuštěním
+            e.returnValue = zprava; // text se použije v prohlížečích, které ho podporují
+            return zprava;
         }
     });
 })();
