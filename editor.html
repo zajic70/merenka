@@ -9,41 +9,44 @@
     <style>
         .figbox { background:#fff; border:1px solid #ddd; border-radius:.5rem; }
         .figbox svg { width:100%; height:auto; }
-        /* zvýraznění při najetí / tažení */
         .mira-marker { cursor: move; }
-        .mira-marker:hover .num,
-        .mira-marker.sel .num { fill:#0d6efd; font-weight:800; }
-        .mira-marker:hover line, .mira-marker:hover path, .mira-marker:hover ellipse,
-        .mira-marker.sel line, .mira-marker.sel path, .mira-marker.sel ellipse { stroke:#0d6efd; }
-        .grab { fill: transparent; }
-        #panel { position: sticky; top: 1rem; max-height: 90vh; overflow:auto; }
-        #readout { font-family: ui-monospace, monospace; font-size:.8rem; }
+        .mira-marker:hover .num, .mira-marker.sel .num { fill:#0d6efd; font-weight:800; }
+        .mira-marker.sel line:not(.lead), .mira-marker.sel path:not(.lead), .mira-marker.sel ellipse { stroke:#0d6efd; }
+        /* úchyty */
+        .ui { cursor: pointer; }
+        .ui-move { fill: transparent; }
+        .ui-rx, .ui-ry { fill:#198754; stroke:#fff; stroke-width:.6; }      /* zelené = šířka/výška elipsy */
+        .ui-pt { fill:#0d6efd; stroke:#fff; stroke-width:.6; }              /* modré = konce úseček */
+        #panel { position: sticky; top: 1rem; max-height: 94vh; overflow:auto; }
+        #readout { font-size:.78rem; }
         #readout tr.active { background:#fff3cd; }
-        .badgepos { font-family: ui-monospace, monospace; }
+        .leg { font-size:.75rem; }
     </style>
 </head>
 <body class="bg-light">
 <div class="container-fluid my-3">
-    <h1 class="h5 mb-3">Editor měr – tahej myší, vpravo vidíš co je co</h1>
+    <h1 class="h5 mb-1">Editor měr</h1>
+    <p class="leg text-muted mb-3">
+        Číslo = posun celé míry &nbsp;•&nbsp;
+        <span class="text-success">●</span> zelený čtvereček = šířka/výška elipsy &nbsp;•&nbsp;
+        <span class="text-primary">●</span> modrý čtvereček = konec úsečky (šipky). Po vybrání lze jemně šipkami ←→↑↓.
+    </p>
     <div class="row g-3">
-        <div class="col-lg-8">
-            <div id="figury" class="row g-3"></div>
-        </div>
+        <div class="col-lg-8"><div id="figury" class="row g-3"></div></div>
         <div class="col-lg-4">
             <div id="panel" class="card shadow-sm">
                 <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
-                    <span>Míry</span>
+                    <span>Změny</span>
                     <span>
                         <button id="btnReset" class="btn btn-sm btn-outline-secondary">Reset</button>
                         <button id="btnExport" class="btn btn-sm btn-primary">Export</button>
                     </span>
                 </div>
                 <div class="card-body p-2">
-                    <p class="small text-muted mb-2">Vybraná míra: <strong id="selName">—</strong>.
-                        Tahej myší; jemně šipkami (← → ↑ ↓) po vybrání.</p>
+                    <p class="small text-muted mb-2">Vybráno: <strong id="selName">—</strong></p>
                     <table class="table table-sm" id="readout"><tbody></tbody></table>
-                    <textarea id="exportBox" class="form-control font-monospace" rows="8" readonly
-                              placeholder="Tady se po stisku Export objeví posuny – zkopíruj a pošli mi je."></textarea>
+                    <textarea id="exportBox" class="form-control font-monospace" rows="10" readonly
+                              placeholder="Po stisku Export se sem vypíšou upravené míry – zkopíruj a pošli mi je."></textarea>
                 </div>
             </div>
         </div>
@@ -53,126 +56,150 @@
 <script>
 (function(){
     'use strict';
+    var SVGNS='http://www.w3.org/2000/svg';
     var NAMES = {
-        muz:  {1:'výška postavy',2:'obvod krku',3:'obvod hrudníku',4:'obvod pasu',5:'obvod sedu',6:'délka ramene a ruky',7:'obvod paže',8:'obvod stehna',9:'šíře zad',10:'kroková délka'},
-        zena: {1:'výška postavy',2:'obvod hrudníku',3:'obvod pasu',4:'obvod sedu',5:'délka ramene a ruky',6:'obvod paže',7:'obvod stehna',8:'kroková délka'}
+        muz:{1:'výška postavy',2:'obvod krku',3:'obvod hrudníku',4:'obvod pasu',5:'obvod sedu',6:'délka ramene a ruky',7:'obvod paže',8:'obvod stehna',9:'šíře zad',10:'kroková délka'},
+        zena:{1:'výška postavy',2:'obvod hrudníku',3:'obvod pasu',4:'obvod sedu',5:'délka ramene a ruky',6:'obvod paže',7:'obvod stehna',8:'kroková délka'}
     };
-    function nazev(mira){ var p=mira.split('-'); var sex=p[0]==='zena'?'zena':'muz'; return (NAMES[sex][+p[1]]||mira); }
+    function nazev(m){var p=m.split('-');return (NAMES[p[0]==='zena'?'zena':'muz'][+p[1]]||m);}
 
-    var offsets = {};   // { figKey: { mira: [dx,dy] } }
+    var changed = new Set();   // změněné markery (elementy)
     var selected = null;
 
+    function getLocal(refEl, e){
+        var svg=refEl.ownerSVGElement||refEl;
+        var pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+        return pt.matrixTransform(refEl.getScreenCTM().inverse());
+    }
+    function parseTranslate(g){
+        var t=g.getAttribute('transform')||''; var m=t.match(/translate\(\s*(-?[\d.]+)[ ,]+(-?[\d.]+)/);
+        return m?[parseFloat(m[1]),parseFloat(m[2])]:[0,0];
+    }
+    function setTranslate(g,x,y){ g.setAttribute('transform','translate('+Math.round(x)+','+Math.round(y)+')'); }
+
     fetch('index.html').then(function(r){return r.text();}).then(function(html){
-        var doc = new DOMParser().parseFromString(html,'text/html');
-        var svgs = doc.querySelectorAll('.figure-svg');
-        var wrap = document.getElementById('figury');
-        var titulky = {'muz':'Muž – zepředu','muz-zad':'Muž – zezadu','zena':'Žena – zepředu'};
+        var doc=new DOMParser().parseFromString(html,'text/html');
+        var svgs=doc.querySelectorAll('.figure-svg');
+        var wrap=document.getElementById('figury');
+        var T={'muz':'Muž – zepředu','muz-zad':'Muž – zezadu','zena':'Žena – zepředu'};
         svgs.forEach(function(svg){
-            var fig = svg.getAttribute('data-fig');
-            var col = document.createElement('div');
-            col.className = 'col-md-4';
-            col.innerHTML = '<div class="figbox p-2"><div class="small text-secondary text-center mb-1">'+(titulky[fig]||fig)+'</div></div>';
+            var fig=svg.getAttribute('data-fig');
+            var col=document.createElement('div'); col.className='col-md-4';
+            col.innerHTML='<div class="figbox p-2"><div class="small text-secondary text-center mb-1">'+(T[fig]||fig)+'</div></div>';
             col.querySelector('.figbox').appendChild(svg);
             wrap.appendChild(col);
-            offsets[fig] = {};
-            pripravSvg(svg, fig);
+            svg.querySelectorAll('.mira-marker').forEach(vybavMarker);
         });
         renderReadout();
     });
 
-    function pripravSvg(svg, fig){
-        // přidá průhledný úchyt přes každou míru a drag chování
-        svg.querySelectorAll('.mira-marker').forEach(function(m){
-            // úchyt = kolečko kolem čísla (chytni číslo, posune se celá míra)
-            var num = m.querySelector('.num');
-            var c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-            if(num){
-                c.setAttribute('cx', num.getAttribute('x'));
-                c.setAttribute('cy', num.getAttribute('y'));
-                c.setAttribute('r', 13);
-            } else {
-                var bb=m.getBBox(); c.setAttribute('cx',bb.x+bb.width/2); c.setAttribute('cy',bb.y+bb.height/2); c.setAttribute('r',12);
-            }
-            c.setAttribute('class','grab');
+    function H(cls,x,y,s){var r=document.createElementNS(SVGNS,'rect');r.setAttribute('class','ui '+cls);r.setAttribute('width',s);r.setAttribute('height',s);r.setAttribute('x',x-s/2);r.setAttribute('y',y-s/2);return r;}
+
+    function vybavMarker(m){
+        m._handles=[];
+        // 1) posun celé míry – průhledné kolečko u čísla
+        var num=m.querySelector('.num');
+        if(num){
+            var c=document.createElementNS(SVGNS,'circle');
+            c.setAttribute('class','ui ui-move');
+            c.setAttribute('cx',num.getAttribute('x')); c.setAttribute('cy',num.getAttribute('y')); c.setAttribute('r',12);
             m.appendChild(c);
-            offsets[fig][m.dataset.mira] = [0,0];
-            zapojDrag(svg, m, fig);
+            dragMove(c,m);
+        }
+        // 2) elipsy – úchyt šířky (rx) a výšky (ry)
+        m.querySelectorAll('ellipse').forEach(function(el){
+            var hx=H('ui-rx',0,0,5), hy=H('ui-ry',0,0,5);
+            m.appendChild(hx); m.appendChild(hy);
+            m._handles.push({el:el,hx:hx,hy:hy});
+            dragEllipse(hx,m,el,'rx'); dragEllipse(hy,m,el,'ry');
+        });
+        // 3) úsečky (ne lead) – konce
+        m.querySelectorAll('line').forEach(function(ln){
+            if(ln.classList.contains('lead')) return;
+            var p1=H('ui-pt',0,0,5), p2=H('ui-pt',0,0,5);
+            m.appendChild(p1); m.appendChild(p2);
+            m._handles.push({el:ln,p1:p1,p2:p2});
+            dragPoint(p1,m,ln,1); dragPoint(p2,m,ln,2);
+        });
+        polohujHandly(m);
+    }
+
+    function polohujHandly(m){
+        (m._handles||[]).forEach(function(h){
+            if(h.hx){
+                var cx=+h.el.getAttribute('cx'),cy=+h.el.getAttribute('cy'),rx=+h.el.getAttribute('rx'),ry=+h.el.getAttribute('ry');
+                h.hx.setAttribute('x',cx+rx-2.5); h.hx.setAttribute('y',cy-2.5);
+                h.hy.setAttribute('x',cx-2.5);    h.hy.setAttribute('y',cy-ry-2.5);
+            } else if(h.p1){
+                h.p1.setAttribute('x',(+h.el.getAttribute('x1'))-2.5); h.p1.setAttribute('y',(+h.el.getAttribute('y1'))-2.5);
+                h.p2.setAttribute('x',(+h.el.getAttribute('x2'))-2.5); h.p2.setAttribute('y',(+h.el.getAttribute('y2'))-2.5);
+            }
         });
     }
 
-    function svgBod(svg, e){
-        var pt = svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
-        return pt.matrixTransform(svg.getScreenCTM().inverse());
-    }
-
-    function zapojDrag(svg, m, fig){
-        var start=null, base=null;
-        m.addEventListener('pointerdown', function(e){
-            e.preventDefault();
-            vyber(m, fig);
-            start = svgBod(svg,e);
-            base = offsets[fig][m.dataset.mira].slice();
-            m.setPointerCapture(e.pointerId);
-        });
-        m.addEventListener('pointermove', function(e){
-            if(!start) return;
-            var p = svgBod(svg,e);
-            var dx = Math.round(base[0] + (p.x-start.x));
-            var dy = Math.round(base[1] + (p.y-start.y));
-            offsets[fig][m.dataset.mira] = [dx,dy];
-            m.setAttribute('transform','translate('+dx+','+dy+')');
-            renderReadout();
-        });
-        m.addEventListener('pointerup', function(e){ start=null; try{m.releasePointerCapture(e.pointerId);}catch(_){ } });
-    }
-
-    function vyber(m, fig){
+    function oznac(m){
         document.querySelectorAll('.mira-marker.sel').forEach(function(x){x.classList.remove('sel');});
-        m.classList.add('sel');
-        selected = {m:m, fig:fig};
-        document.getElementById('selName').textContent = m.dataset.mira+' · '+nazev(m.dataset.mira);
+        m.classList.add('sel'); selected=m;
+        document.getElementById('selName').textContent=m.dataset.mira+' · '+nazev(m.dataset.mira);
+    }
+    function zmena(m){ changed.add(m); renderReadout(); }
+
+    function dragMove(handle,m){
+        var start,base;
+        handle.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();oznac(m);start=getLocal(m.parentNode,e);base=parseTranslate(m);handle.setPointerCapture(e.pointerId);});
+        handle.addEventListener('pointermove',function(e){if(!start)return;var p=getLocal(m.parentNode,e);setTranslate(m,base[0]+(p.x-start.x),base[1]+(p.y-start.y));zmena(m);});
+        handle.addEventListener('pointerup',function(e){start=null;try{handle.releasePointerCapture(e.pointerId);}catch(_){}})
+    }
+    function dragEllipse(handle,m,el,kind){
+        var active=false;
+        handle.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();oznac(m);active=true;handle.setPointerCapture(e.pointerId);});
+        handle.addEventListener('pointermove',function(e){if(!active)return;var p=getLocal(m,e);var cx=+el.getAttribute('cx'),cy=+el.getAttribute('cy');
+            if(kind==='rx'){el.setAttribute('rx',Math.max(2,Math.round(Math.abs(p.x-cx))));}
+            else {el.setAttribute('ry',Math.max(2,Math.round(Math.abs(cy-p.y))));}
+            polohujHandly(m);zmena(m);});
+        handle.addEventListener('pointerup',function(e){active=false;try{handle.releasePointerCapture(e.pointerId);}catch(_){}})
+    }
+    function dragPoint(handle,m,ln,which){
+        var active=false;
+        handle.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();oznac(m);active=true;handle.setPointerCapture(e.pointerId);});
+        handle.addEventListener('pointermove',function(e){if(!active)return;var p=getLocal(m,e);
+            ln.setAttribute('x'+which,Math.round(p.x)); ln.setAttribute('y'+which,Math.round(p.y));
+            polohujHandly(m);zmena(m);});
+        handle.addEventListener('pointerup',function(e){active=false;try{handle.releasePointerCapture(e.pointerId);}catch(_){}})
     }
 
-    // jemný posun šipkami
-    document.addEventListener('keydown', function(e){
-        if(!selected) return;
-        var d = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
-        if(!d) return;
-        e.preventDefault();
-        var o = offsets[selected.fig][selected.m.dataset.mira];
-        o[0]+=d[0]; o[1]+=d[1];
-        selected.m.setAttribute('transform','translate('+o[0]+','+o[1]+')');
-        renderReadout();
+    // jemný posun celé míry šipkami
+    document.addEventListener('keydown',function(e){
+        if(!selected)return; var d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key]; if(!d)return;
+        e.preventDefault(); var b=parseTranslate(selected); setTranslate(selected,b[0]+d[0],b[1]+d[1]); zmena(selected);
     });
 
     function renderReadout(){
-        var tb = document.querySelector('#readout tbody');
-        tb.innerHTML='';
-        Object.keys(offsets).forEach(function(fig){
-            Object.keys(offsets[fig]).forEach(function(mira){
-                var o = offsets[fig][mira];
-                var tr=document.createElement('tr');
-                if(selected && selected.fig===fig && selected.m.dataset.mira===mira) tr.className='active';
-                var posun = (o[0]||o[1]) ? ('<span class="badge text-bg-warning badgepos">'+o[0]+', '+o[1]+'</span>') : '<span class="text-muted">0, 0</span>';
-                tr.innerHTML='<td class="text-muted">'+fig+'</td><td>'+mira+' · '+nazev(mira)+'</td><td class="text-end">'+posun+'</td>';
-                tb.appendChild(tr);
-            });
+        var tb=document.querySelector('#readout tbody'); tb.innerHTML='';
+        changed.forEach(function(m){
+            var svg=m.ownerSVGElement; var fig=svg.getAttribute('data-fig');
+            var tr=document.createElement('tr'); if(m===selected)tr.className='active';
+            tr.innerHTML='<td class="text-muted">'+fig+'</td><td>'+m.dataset.mira+' · '+nazev(m.dataset.mira)+'</td>';
+            tb.appendChild(tr);
         });
+        if(!changed.size) tb.innerHTML='<tr><td class="text-muted small">Zatím nic nezměněno.</td></tr>';
     }
 
-    document.getElementById('btnExport').addEventListener('click', function(){
-        document.getElementById('exportBox').value = JSON.stringify(offsets,null,1);
-    });
-    document.getElementById('btnReset').addEventListener('click', function(){
-        Object.keys(offsets).forEach(function(fig){
-            Object.keys(offsets[fig]).forEach(function(mira){
-                offsets[fig][mira]=[0,0];
-            });
+    function cisty(m){
+        var clone=m.cloneNode(true);
+        clone.querySelectorAll('.ui').forEach(function(x){x.remove();});
+        return clone.outerHTML.replace(/\s+/g,' ').replace(/> </g,'>\n  <');
+    }
+    document.getElementById('btnExport').addEventListener('click',function(){
+        var out=[]; var byFig={};
+        changed.forEach(function(m){var f=m.ownerSVGElement.getAttribute('data-fig');(byFig[f]=byFig[f]||[]).push(m);});
+        Object.keys(byFig).forEach(function(f){
+            out.push('=== '+f+' ===');
+            byFig[f].forEach(function(m){ out.push(cisty(m)); });
         });
-        document.querySelectorAll('.mira-marker').forEach(function(m){m.removeAttribute('transform');});
-        document.getElementById('exportBox').value='';
-        renderReadout();
+        document.getElementById('exportBox').value = out.join('\n\n') || '(nic nezměněno)';
     });
+    document.getElementById('btnReset').addEventListener('click',function(){ location.reload(); });
 })();
 </script>
 </body>
