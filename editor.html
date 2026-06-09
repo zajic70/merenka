@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor měr – VAVI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .figbox { background:#fff; border:1px solid #ddd; border-radius:.5rem; }
+        .figbox svg { width:100%; height:auto; }
+        /* zvýraznění při najetí / tažení */
+        .mira-marker { cursor: move; }
+        .mira-marker:hover .num,
+        .mira-marker.sel .num { fill:#0d6efd; font-weight:800; }
+        .mira-marker:hover line, .mira-marker:hover path, .mira-marker:hover ellipse,
+        .mira-marker.sel line, .mira-marker.sel path, .mira-marker.sel ellipse { stroke:#0d6efd; }
+        .grab { fill: transparent; }
+        #panel { position: sticky; top: 1rem; max-height: 90vh; overflow:auto; }
+        #readout { font-family: ui-monospace, monospace; font-size:.8rem; }
+        #readout tr.active { background:#fff3cd; }
+        .badgepos { font-family: ui-monospace, monospace; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid my-3">
+    <h1 class="h5 mb-3">Editor měr – tahej myší, vpravo vidíš co je co</h1>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div id="figury" class="row g-3"></div>
+        </div>
+        <div class="col-lg-4">
+            <div id="panel" class="card shadow-sm">
+                <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                    <span>Míry</span>
+                    <span>
+                        <button id="btnReset" class="btn btn-sm btn-outline-secondary">Reset</button>
+                        <button id="btnExport" class="btn btn-sm btn-primary">Export</button>
+                    </span>
+                </div>
+                <div class="card-body p-2">
+                    <p class="small text-muted mb-2">Vybraná míra: <strong id="selName">—</strong>.
+                        Tahej myší; jemně šipkami (← → ↑ ↓) po vybrání.</p>
+                    <table class="table table-sm" id="readout"><tbody></tbody></table>
+                    <textarea id="exportBox" class="form-control font-monospace" rows="8" readonly
+                              placeholder="Tady se po stisku Export objeví posuny – zkopíruj a pošli mi je."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    'use strict';
+    var NAMES = {
+        muz:  {1:'výška postavy',2:'obvod krku',3:'obvod hrudníku',4:'obvod pasu',5:'obvod sedu',6:'délka ramene a ruky',7:'obvod paže',8:'obvod stehna',9:'šíře zad',10:'kroková délka'},
+        zena: {1:'výška postavy',2:'obvod hrudníku',3:'obvod pasu',4:'obvod sedu',5:'délka ramene a ruky',6:'obvod paže',7:'obvod stehna',8:'kroková délka'}
+    };
+    function nazev(mira){ var p=mira.split('-'); var sex=p[0]==='zena'?'zena':'muz'; return (NAMES[sex][+p[1]]||mira); }
+
+    var offsets = {};   // { figKey: { mira: [dx,dy] } }
+    var selected = null;
+
+    fetch('index.html').then(function(r){return r.text();}).then(function(html){
+        var doc = new DOMParser().parseFromString(html,'text/html');
+        var svgs = doc.querySelectorAll('.figure-svg');
+        var wrap = document.getElementById('figury');
+        var titulky = {'muz':'Muž – zepředu','muz-zad':'Muž – zezadu','zena':'Žena – zepředu'};
+        svgs.forEach(function(svg){
+            var fig = svg.getAttribute('data-fig');
+            var col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = '<div class="figbox p-2"><div class="small text-secondary text-center mb-1">'+(titulky[fig]||fig)+'</div></div>';
+            col.querySelector('.figbox').appendChild(svg);
+            wrap.appendChild(col);
+            offsets[fig] = {};
+            pripravSvg(svg, fig);
+        });
+        renderReadout();
+    });
+
+    function pripravSvg(svg, fig){
+        // přidá průhledný úchyt přes každou míru a drag chování
+        svg.querySelectorAll('.mira-marker').forEach(function(m){
+            // úchyt = kolečko kolem čísla (chytni číslo, posune se celá míra)
+            var num = m.querySelector('.num');
+            var c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+            if(num){
+                c.setAttribute('cx', num.getAttribute('x'));
+                c.setAttribute('cy', num.getAttribute('y'));
+                c.setAttribute('r', 13);
+            } else {
+                var bb=m.getBBox(); c.setAttribute('cx',bb.x+bb.width/2); c.setAttribute('cy',bb.y+bb.height/2); c.setAttribute('r',12);
+            }
+            c.setAttribute('class','grab');
+            m.appendChild(c);
+            offsets[fig][m.dataset.mira] = [0,0];
+            zapojDrag(svg, m, fig);
+        });
+    }
+
+    function svgBod(svg, e){
+        var pt = svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function zapojDrag(svg, m, fig){
+        var start=null, base=null;
+        m.addEventListener('pointerdown', function(e){
+            e.preventDefault();
+            vyber(m, fig);
+            start = svgBod(svg,e);
+            base = offsets[fig][m.dataset.mira].slice();
+            m.setPointerCapture(e.pointerId);
+        });
+        m.addEventListener('pointermove', function(e){
+            if(!start) return;
+            var p = svgBod(svg,e);
+            var dx = Math.round(base[0] + (p.x-start.x));
+            var dy = Math.round(base[1] + (p.y-start.y));
+            offsets[fig][m.dataset.mira] = [dx,dy];
+            m.setAttribute('transform','translate('+dx+','+dy+')');
+            renderReadout();
+        });
+        m.addEventListener('pointerup', function(e){ start=null; try{m.releasePointerCapture(e.pointerId);}catch(_){ } });
+    }
+
+    function vyber(m, fig){
+        document.querySelectorAll('.mira-marker.sel').forEach(function(x){x.classList.remove('sel');});
+        m.classList.add('sel');
+        selected = {m:m, fig:fig};
+        document.getElementById('selName').textContent = m.dataset.mira+' · '+nazev(m.dataset.mira);
+    }
+
+    // jemný posun šipkami
+    document.addEventListener('keydown', function(e){
+        if(!selected) return;
+        var d = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+        if(!d) return;
+        e.preventDefault();
+        var o = offsets[selected.fig][selected.m.dataset.mira];
+        o[0]+=d[0]; o[1]+=d[1];
+        selected.m.setAttribute('transform','translate('+o[0]+','+o[1]+')');
+        renderReadout();
+    });
+
+    function renderReadout(){
+        var tb = document.querySelector('#readout tbody');
+        tb.innerHTML='';
+        Object.keys(offsets).forEach(function(fig){
+            Object.keys(offsets[fig]).forEach(function(mira){
+                var o = offsets[fig][mira];
+                var tr=document.createElement('tr');
+                if(selected && selected.fig===fig && selected.m.dataset.mira===mira) tr.className='active';
+                var posun = (o[0]||o[1]) ? ('<span class="badge text-bg-warning badgepos">'+o[0]+', '+o[1]+'</span>') : '<span class="text-muted">0, 0</span>';
+                tr.innerHTML='<td class="text-muted">'+fig+'</td><td>'+mira+' · '+nazev(mira)+'</td><td class="text-end">'+posun+'</td>';
+                tb.appendChild(tr);
+            });
+        });
+    }
+
+    document.getElementById('btnExport').addEventListener('click', function(){
+        document.getElementById('exportBox').value = JSON.stringify(offsets,null,1);
+    });
+    document.getElementById('btnReset').addEventListener('click', function(){
+        Object.keys(offsets).forEach(function(fig){
+            Object.keys(offsets[fig]).forEach(function(mira){
+                offsets[fig][mira]=[0,0];
+            });
+        });
+        document.querySelectorAll('.mira-marker').forEach(function(m){m.removeAttribute('transform');});
+        document.getElementById('exportBox').value='';
+        renderReadout();
+    });
+})();
+</script>
+</body>
+</html>
