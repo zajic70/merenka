@@ -17,6 +17,7 @@
         .ui-move { fill: transparent; }
         .ui-rx, .ui-ry { fill:#198754; stroke:#fff; stroke-width:.6; }      /* zelené = šířka/výška elipsy */
         .ui-pt { fill:#0d6efd; stroke:#fff; stroke-width:.6; }              /* modré = konce úseček */
+        .ui-path { fill:#fd7e14; stroke:#fff; stroke-width:.6; }            /* oranžové = body šipek (křivek) */
         #panel { position: sticky; top: 1rem; max-height: 94vh; overflow:auto; }
         #readout { font-size:.78rem; }
         #readout tr.active { background:#fff3cd; }
@@ -29,7 +30,8 @@
     <p class="leg text-muted mb-3">
         Číslo = posun celé míry &nbsp;•&nbsp;
         <span class="text-success">●</span> zelený čtvereček = šířka/výška elipsy &nbsp;•&nbsp;
-        <span class="text-primary">●</span> modrý čtvereček = konec úsečky (šipky). Po vybrání lze jemně šipkami ←→↑↓.
+        <span class="text-primary">●</span> modrý = konec úsečky &nbsp;•&nbsp;
+        <span style="color:#fd7e14">●</span> oranžový = bod šipky (začátek/ohyb/konec). Po vybrání lze jemně šipkami ←→↑↓.
     </p>
     <div class="row g-3">
         <div class="col-lg-8"><div id="figury" class="row g-3"></div></div>
@@ -76,6 +78,22 @@
         return m?[parseFloat(m[1]),parseFloat(m[2])]:[0,0];
     }
     function setTranslate(g,x,y){ g.setAttribute('transform','translate('+Math.round(x)+','+Math.round(y)+')'); }
+    var POCET={M:1,L:1,T:1,Q:2,S:2,C:3,Z:0};
+    function parsePath(d){
+        var tok=d.match(/[a-zA-Z]|-?\d*\.?\d+/g); if(!tok) return null;
+        var segs=[], i=0;
+        while(i<tok.length){
+            var cmd=tok[i++]; if(!/[a-zA-Z]/.test(cmd)) return null;
+            var n=POCET[cmd.toUpperCase()]; if(n===undefined) return null;
+            var coords=[];
+            for(var k=0;k<n;k++){ coords.push([parseFloat(tok[i++]),parseFloat(tok[i++])]); }
+            segs.push({cmd:cmd,coords:coords});
+        }
+        return segs;
+    }
+    function buildPath(segs){
+        return segs.map(function(s){ return s.cmd + s.coords.map(function(c){return c[0]+','+c[1];}).join(' '); }).join(' ');
+    }
 
     fetch('index.html').then(function(r){return r.text();}).then(function(html){
         var doc=new DOMParser().parseFromString(html,'text/html');
@@ -121,6 +139,16 @@
             m._handles.push({el:ln,p1:p1,p2:p2});
             dragPoint(p1,m,ln,1); dragPoint(p2,m,ln,2);
         });
+        // 4) šipky (path, ne lead/thin) – body křivky
+        m.querySelectorAll('path').forEach(function(pth){
+            if(pth.classList.contains('lead')||pth.classList.contains('thin')) return;
+            var segs=parsePath(pth.getAttribute('d')); if(!segs) return;
+            var pts=[]; segs.forEach(function(s){ s.coords.forEach(function(c,i){ pts.push({seg:s,idx:i}); }); });
+            pth._segs=segs;
+            var handles=pts.map(function(){ var h=H('ui-path',0,0,5); m.appendChild(h); return h; });
+            m._handles.push({el:pth,path:true,segs:segs,pts:pts,handles:handles});
+            handles.forEach(function(h,i){ dragPathPt(h,m,pth,pts[i]); });
+        });
         polohujHandly(m);
     }
 
@@ -133,6 +161,8 @@
             } else if(h.p1){
                 h.p1.setAttribute('x',(+h.el.getAttribute('x1'))-2.5); h.p1.setAttribute('y',(+h.el.getAttribute('y1'))-2.5);
                 h.p2.setAttribute('x',(+h.el.getAttribute('x2'))-2.5); h.p2.setAttribute('y',(+h.el.getAttribute('y2'))-2.5);
+            } else if(h.path){
+                h.handles.forEach(function(hh,i){ var c=h.pts[i].seg.coords[h.pts[i].idx]; hh.setAttribute('x',c[0]-2.5); hh.setAttribute('y',c[1]-2.5); });
             }
         });
     }
@@ -164,6 +194,15 @@
         handle.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();oznac(m);active=true;handle.setPointerCapture(e.pointerId);});
         handle.addEventListener('pointermove',function(e){if(!active)return;var p=getLocal(m,e);
             ln.setAttribute('x'+which,Math.round(p.x)); ln.setAttribute('y'+which,Math.round(p.y));
+            polohujHandly(m);zmena(m);});
+        handle.addEventListener('pointerup',function(e){active=false;try{handle.releasePointerCapture(e.pointerId);}catch(_){}})
+    }
+    function dragPathPt(handle,m,pth,pt){
+        var active=false;
+        handle.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();oznac(m);active=true;handle.setPointerCapture(e.pointerId);});
+        handle.addEventListener('pointermove',function(e){if(!active)return;var p=getLocal(m,e);
+            pt.seg.coords[pt.idx]=[Math.round(p.x),Math.round(p.y)];
+            pth.setAttribute('d',buildPath(pth._segs));
             polohujHandly(m);zmena(m);});
         handle.addEventListener('pointerup',function(e){active=false;try{handle.releasePointerCapture(e.pointerId);}catch(_){}})
     }
