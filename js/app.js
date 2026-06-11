@@ -360,6 +360,18 @@
         var polozky = radkyKosiku();
         var logoUrl = new URL('img/logo.svg', location.href).href;
 
+        // postavy s měřicími čarami (jen pohlaví, která jsou v košíku)
+        function figuraHtml(fig, popis) {
+            var s = document.querySelector('.figure-svg[data-fig="' + fig + '"]');
+            return s ? '<figure class="fig"><figcaption>' + popis + '</figcaption>' + s.outerHTML + '</figure>' : '';
+        }
+        var usedMuz = polozky.some(function (p) { return p.pohlavi === 'muz'; });
+        var usedZena = polozky.some(function (p) { return p.pohlavi === 'zena'; });
+        var figury = '';
+        if (usedMuz) figury += figuraHtml('muz', 'Muž – zepředu') + figuraHtml('muz-zad', 'Muž – zezadu');
+        if (usedZena) figury += figuraHtml('zena', 'Žena – zepředu');
+        var figSekce = figury ? '<h2>Vyobrazení rozměrů</h2><div class="figury">' + figury + '</div>' : '';
+
         var prehled = polozky.map(function (p, i) {
             var data = kosikData[p.id] || {};
             var ma = Object.keys(data).length > 0;
@@ -401,6 +413,17 @@
 '.podpis{display:flex;justify-content:space-between;margin-top:40px;gap:40px}' +
 '.podpis div{flex:1;border-top:1px solid #888;padding-top:4px;text-align:center;font-size:11px;color:#666}' +
 '.pozn{margin-top:16px;font-size:10px;color:#777}' +
+'.figury{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;break-inside:avoid}' +
+'.fig{margin:0;text-align:center}.fig figcaption{font-size:11px;color:#555;margin-bottom:2px}' +
+'.fig svg{height:300px;width:auto}' +
+'.figure-svg .body{fill:none;stroke:#9c5a3c;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}' +
+'.figure-svg .body .ground{stroke-dasharray:2 3;stroke-width:1.4}' +
+'.figure-svg .dims{fill:none;stroke:#1a1a1a;stroke-width:1.4}' +
+'.figure-svg .dims .dash{stroke-dasharray:4 3}.figure-svg .dims .thin{stroke-width:1}' +
+'.figure-svg .pomoc{fill:none;stroke:#9a9a9a;stroke-width:1;stroke-dasharray:4 3}' +
+'.figure-svg .dims .lead{stroke:#9a9a9a;stroke-width:.9}' +
+'.figure-svg .num{fill:#1a1a1a;stroke:none;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle}' +
+'.figure-svg .num-bg{fill:#e0e0e0;stroke:none}.figure-svg .hit-area{fill:transparent;stroke:none}' +
 '@media print{body{padding:0}}' +
 '</style></head><body>' +
 '<div class="hd"><div><h1>Protokol o naměřených údajích</h1>' +
@@ -411,6 +434,7 @@
 '<table class="prehled"><thead><tr><th class="c">#</th><th>Položka</th><th class="c">Pohl.</th><th class="c">Vel.</th><th>Míry (zkratky)</th></tr></thead><tbody>' +
 prehled + '</tbody></table>' +
 '<h2>Naměřené rozměry</h2><div class="detaily">' + detaily + '</div>' +
+figSekce +
 '<p class="pozn">* Doplňkové míry u nestandardní postavy. Naměřené míry neupravujte ani jedním směrem – výrobce oblečení s rezervou pro volný pohyb již počítá.</p>' +
 '<div class="podpis"><div>Změřil(a)</div><div>Podpis pracovníka</div><div>Datum</div></div>' +
 '</body></html>';
