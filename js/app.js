@@ -186,7 +186,11 @@
         if (!span) return;
         var t = textZkratek(pohlavi, kosikData[rowId] || {});
         if (t) {
-            span.textContent = t;
+            span.textContent = '';
+            var ico = document.createElement('i');
+            ico.className = 'bi bi-check-circle-fill text-success me-1';
+            span.appendChild(ico);
+            span.appendChild(document.createTextNode(t));
             span.classList.remove('text-muted', 'fst-italic');
             span.classList.add('text-dark');
         } else {
@@ -194,6 +198,16 @@
             span.classList.add('text-muted', 'fst-italic');
             span.classList.remove('text-dark');
         }
+    }
+
+    // Označí pole, je-li míra mimo běžné rozmezí (min–max)
+    function overRozsah(inp) {
+        var v = parseFloat(inp.value), mn = parseFloat(inp.min), mx = parseFloat(inp.max);
+        var mimo = inp.value !== '' && !isNaN(v) && (v < mn || v > mx);
+        inp.classList.toggle('mimo-rozsah', mimo);
+    }
+    function overPohlavi(pohlavi) {
+        MIRY[pohlavi].forEach(function (m) { var i = vstup(pohlavi, m.n); if (i) overRozsah(i); });
     }
 
     // Naplň tabulku dole z uložených dat řádku
@@ -259,6 +273,7 @@
 
             zobrazPohlavi(aktivniPohlavi);
             nactiDoTabulky(aktivniPohlavi, kosikData[aktivniRadek]);
+            overPohlavi(aktivniPohlavi);
 
             // banner s názvem položky
             document.getElementById('mereni-nazev').textContent = tr.dataset.nazev || '';
@@ -282,6 +297,7 @@
             var inp = vstup(pohlavi, m.n);
             if (!inp) return;
             inp.addEventListener('input', function () {
+                overRozsah(inp);
                 if (!aktivniRadek || aktivniPohlavi !== pohlavi) return;
                 if (inp.value === '') delete kosikData[aktivniRadek][m.n];
                 else kosikData[aktivniRadek][m.n] = inp.value;
@@ -302,6 +318,20 @@
             banner.classList.remove('d-flex');
             if (hint) hint.classList.remove('d-none');
             document.querySelectorAll('#kosik tr').forEach(function (r) { r.classList.remove('table-active'); });
+        });
+    }
+
+    // „Vymazat míry" → vymaže míry aktivní položky
+    var vymazat = document.getElementById('mereni-vymazat');
+    if (vymazat) {
+        vymazat.addEventListener('click', function () {
+            if (!aktivniRadek) return;
+            if (!confirm('Opravdu vymazat naměřené míry této položky?')) return;
+            kosikData[aktivniRadek] = {};
+            nactiDoTabulky(aktivniPohlavi, {});
+            overPohlavi(aktivniPohlavi);
+            zapisDoRadku(aktivniRadek, aktivniPohlavi);
+            ulozData();
         });
     }
 
