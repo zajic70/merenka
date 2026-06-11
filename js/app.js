@@ -388,44 +388,7 @@
             }).join('');
         if (!detaily) detaily = '<p class="muted">Zatím nejsou vyplněné žádné míry.</p>';
 
-        var html =
-'<!DOCTYPE html><html lang="cs"><head><meta charset="UTF-8"><title>Protokol o naměřených údajích</title>' +
-'<style>' +
-'*{box-sizing:border-box}' +
-'body{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;margin:0;padding:24px;font-size:12px}' +
-'.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1a1a;padding-bottom:12px;margin-bottom:16px}' +
-'.hd img{height:34px}' +
-'.hd h1{font-size:18px;margin:0 0 2px}' +
-'.hd .meta{font-size:11px;color:#555}' +
-'.osoba{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0 0 18px}' +
-'.osoba div{border-bottom:1px solid #bbb;padding:10px 2px 3px;font-size:11px;color:#777}' +
-'h2{font-size:13px;margin:18px 0 6px;border-left:4px solid #0d6efd;padding-left:8px}' +
-'table{border-collapse:collapse;width:100%}' +
-'.prehled th,.prehled td{border:1px solid #ccc;padding:5px 7px;text-align:left}' +
-'.prehled th{background:#f0f3f7}' +
-'.detail{break-inside:avoid;margin:10px 0 14px}' +
-'.detail h3{font-size:12px;margin:0 0 4px}.detail small{color:#777;font-weight:normal}' +
-'.miry{width:auto;min-width:260px}.miry th,.miry td{border:1px solid #ddd;padding:3px 8px}' +
-'.miry th{background:#f7f7f7;font-size:11px}' +
-'.detaily{display:flex;flex-wrap:wrap;gap:8px 24px}' +
-'.c{text-align:center;color:#555;width:1%;white-space:nowrap}.v{text-align:right;white-space:nowrap}' +
-'.muted{color:#999;font-style:italic}' +
-'.podpis{display:flex;justify-content:space-between;margin-top:40px;gap:40px}' +
-'.podpis div{flex:1;border-top:1px solid #888;padding-top:4px;text-align:center;font-size:11px;color:#666}' +
-'.pozn{margin-top:16px;font-size:10px;color:#777}' +
-'.figury{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;break-inside:avoid}' +
-'.fig{margin:0;text-align:center}.fig figcaption{font-size:11px;color:#555;margin-bottom:2px}' +
-'.fig svg{height:300px;width:auto}' +
-'.figure-svg .body{fill:none;stroke:#9c5a3c;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}' +
-'.figure-svg .body .ground{stroke-dasharray:2 3;stroke-width:1.4}' +
-'.figure-svg .dims{fill:none;stroke:#1a1a1a;stroke-width:1.4}' +
-'.figure-svg .dims .dash{stroke-dasharray:4 3}.figure-svg .dims .thin{stroke-width:1}' +
-'.figure-svg .pomoc{fill:none;stroke:#9a9a9a;stroke-width:1;stroke-dasharray:4 3}' +
-'.figure-svg .dims .lead{stroke:#9a9a9a;stroke-width:.9}' +
-'.figure-svg .num{fill:#1a1a1a;stroke:none;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:middle}' +
-'.figure-svg .num-bg{fill:#e0e0e0;stroke:none}.figure-svg .hit-area{fill:transparent;stroke:none}' +
-'@media print{body{padding:0}}' +
-'</style></head><body>' +
+        var inner =
 '<div class="hd"><div><h1>Protokol o naměřených údajích</h1>' +
 '<div class="meta">Měření postavy · vytvořeno ' + datum + '</div></div>' +
 '<img src="' + logoUrl + '" alt="VAVI"></div>' +
@@ -436,19 +399,19 @@ prehled + '</tbody></table>' +
 '<h2>Naměřené rozměry</h2><div class="detaily">' + detaily + '</div>' +
 figSekce +
 '<p class="pozn">* Doplňkové míry u nestandardní postavy. Naměřené míry neupravujte ani jedním směrem – výrobce oblečení s rezervou pro volný pohyb již počítá.</p>' +
-'<div class="podpis"><div>Změřil(a)</div><div>Podpis pracovníka</div><div>Datum</div></div>' +
-'</body></html>';
+'<div class="podpis"><div>Změřil(a)</div><div>Podpis pracovníka</div><div>Datum</div></div>';
 
-        var w = window.open('', '_blank');
-        if (!w) { alert('Vyskakovací okno bylo zablokováno – povolte ho a zkuste znovu.'); return; }
-        w.document.open(); w.document.write(html); w.document.close();
-        w.onload = function () { w.focus(); w.print(); };
-        // fallback, kdyby onload nenaběhl
-        setTimeout(function () { try { w.focus(); w.print(); } catch (e) {} }, 600);
+        var box = document.getElementById('protokol');
+        if (!box) return;
+        box.innerHTML = inner;
+        document.body.classList.add('tisk-protokol');
+        window.print();
     }
 
     var btnProtokol = document.getElementById('btnProtokol');
     if (btnProtokol) btnProtokol.addEventListener('click', vytvorProtokol);
+    // po zavření tiskového dialogu vrať stránku do normálu
+    window.addEventListener('afterprint', function () { document.body.classList.remove('tisk-protokol'); });
 
     // ---- Ošetření reloadu / opuštění stránky: dotaz před ztrátou dat ----
     window.addEventListener('beforeunload', function (e) {
