@@ -107,7 +107,13 @@
             var fig=svg.getAttribute('data-fig');
             var col=document.createElement('div'); col.className='col-md-4';
             col.innerHTML='<div class="figbox p-2"><div class="small text-secondary text-center mb-1">'+(T[fig]||fig)+'</div></div>';
-            col.querySelector('.figbox').appendChild(svg);
+            var box=col.querySelector('.figbox');
+            box.appendChild(svg);
+            var add=document.createElement('button');
+            add.className='btn btn-sm btn-outline-success w-100 mt-2';
+            add.innerHTML='+ čára sem';
+            add.addEventListener('click',function(){ pridejCaru(svg); });
+            box.appendChild(add);
             wrap.appendChild(col);
             svg.querySelectorAll('.mira-marker').forEach(vybavMarker);
         });
@@ -236,8 +242,8 @@
 
     // ---- Pomocné čáry (přidat / smazat) ----
     var caraN=0;
-    document.getElementById('btnCara').addEventListener('click', function(){
-        var svg = selected ? selected.ownerSVGElement : document.querySelector('.figure-svg');
+    function pridejCaru(svg){
+        if(!svg) svg = selected ? selected.ownerSVGElement : document.querySelector('.figure-svg');
         if(!svg) return;
         var dims = svg.querySelector('.dims') || svg;
         var g=document.createElementNS(SVGNS,'g'); g.setAttribute('class','mira-marker'); g.setAttribute('data-mira','cara-'+(++caraN));
@@ -245,7 +251,9 @@
         ln.setAttribute('x1',70); ln.setAttribute('y1',150); ln.setAttribute('x2',140); ln.setAttribute('y2',150);
         g.appendChild(ln); dims.appendChild(g);
         vybavMarker(g); oznac(g); zmena(g);
-    });
+        svg.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    document.getElementById('btnCara').addEventListener('click', function(){ pridejCaru(); });
     document.getElementById('btnSmaz').addEventListener('click', function(){
         if(!selected || String(selected.dataset.mira).indexOf('cara-')!==0){ alert('Smazat lze jen vybranou pomocnou čáru.'); return; }
         changed.delete(selected); selected.remove(); selected=null;
