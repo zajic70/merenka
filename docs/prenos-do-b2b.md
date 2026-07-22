@@ -50,13 +50,13 @@ IIS na `http://localhost/`. Má **vlastní `CLAUDE.md`** s konvencemi, které se
 | `MIRY` — katalog rozměrů + min/max (`js/app.js:13`) | `App\Model\Merenka\MerenkaKatalog` (PHP) | **jediný zdroj pravdy**, do JS se předá z PHP |
 | `ZKRATKY` (`js/app.js:6`) | `MerenkaKatalog` | zkratky do souhrnu „výš.182 krk.41" |
 | `DEFAULTS` konfekční velikosti (`js/app.js:39`) | `MerenkaKatalog` | v embed režimu **se nepoužijí** (viz past níže), v samostatné měřence ano |
-| 3× `<svg class="figure-svg">` (`index.html:194`, `:282`, `:330`) | DB `wtabMerenkaFigury` + `www/merenka/figury/*.svg` | přestává být HTML, stává se **daty** |
+| 3× `<svg class="figure-svg">` (`index.html:197`, `:285`, `:333`) | DB `wtabMerenkaFigury` + `www/merenka/figury/*.svg` | přestává být HTML, stává se **daty** |
 | logika měřenky (`js/app.js`) | `assets/merenka.js` | `kosikData`, `nactiDoTabulky`, `overRozsah`, `textZkratek`, `zobrazPohlavi` beze změny |
 | tisk protokolu (`js/app.js:338–414` + `css/style.css:122–160`) | etapa 5 | **hotová věc předvedená zákazníkovi** — nesmí zmizet |
 | styly (`css/style.css`) | `assets/merenka.scss` | |
 | editor (`editor.html:61–273`) | `assets/merenka-editor.js` | Export → **Uložit** |
 | `img/logo.svg` | `www/merenka/` nebo stávající `www/img/` | používá se v protokolu (`js/app.js:361`) |
-| košík se 7 demo řádky (`index.html:23–109`) | — | embed = objednávka; samostatná měřenka = vlastní seznam |
+| košík se 7 demo řádky (`index.html:26–112`) | — | embed = objednávka; samostatná měřenka = vlastní seznam |
 | `beforeunload` (`js/app.js:417`) | — | v iframu by vyskakoval dotaz při zavření modálu |
 | localStorage `merenka_vavi_kosik_v1` (`js/app.js:45`) | — | data drží formulář objednávky, resp. DB |
 | CDN Bootstrap + ikony (`index.html:9–10`) | — | B2B si Bootstrap buildí přes Vite |
